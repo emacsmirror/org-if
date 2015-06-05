@@ -63,19 +63,19 @@
 ;; optionally declare default header arguments for this language
 (defvar org-babel-default-header-args:org-if '())
 
-;; This function expands the body of a source code block by doing
-;; things like prepending argument definitions to the body, it should
-;; be called by the `org-babel-execute:org-if' function below.
-(defun org-babel-expand-body:org-if (body params &optional processed-params)
-  "Expand BODY according to PARAMS, return the expanded body."
-  (require 'inf-template)
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
-    (concat
-     (mapconcat ;; define any variables
-      (lambda (pair)
-        (format "%s=%S"
-                (car pair) (org-babel-template-var-to-template (cdr pair))))
-      vars "\n") "\n" body "\n")))
+;;; This function expands the body of a source code block by doing
+;;; things like prepending argument definitions to the body, it should
+;;; be called by the `org-babel-execute:org-if' function below.
+;(defun org-babel-expand-body:org-if (body params &optional processed-params)
+;  "Expand BODY according to PARAMS, return the expanded body."
+;  (require 'inf-template)
+;  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
+;    (concat
+;     (mapconcat ;; define any variables
+;      (lambda (pair)
+;        (format "%s=%S"
+;                (car pair) (org-babel-template-var-to-template (cdr pair))))
+;      vars "\n") "\n" body "\n")))
 
 ;; This is the main function which is called to evaluate a code
 ;; block.
@@ -100,48 +100,49 @@
   "Execute a block of Template code with org-babel.
 This function is called by `org-babel-execute-src-block'"
   (message "executing Template source code block")
-  (let* ((processed-params (org-babel-process-params params))
-         ;; set the session if the session variable is non-nil
-         (session (org-babel-template-initiate-session (first processed-params)))
-         ;; variables assigned for use in the block
-         (vars (second processed-params))
-         (result-params (third processed-params))
-         ;; either OUTPUT or VALUE which should behave as described above
-         (result-type (fourth processed-params))
-         ;; expand the body with `org-babel-expand-body:org-if'
-         (full-body (org-babel-expand-body:org-if
-                     body params processed-params)))
-    ;; actually execute the source-code block either in a session or
-    ;; possibly by dropping it to a temporary file and evaluating the
-    ;; file.
-    ;; 
-    ;; for session based evaluation the functions defined in
-    ;; `org-babel-comint' will probably be helpful.
-    ;;
-    ;; for external evaluation the functions defined in
-    ;; `org-babel-eval' will probably be helpful.
-    ;;
-    ;; when forming a shell command, or a fragment of code in some
-    ;; other language, please preprocess any file names involved with
-    ;; the function `org-babel-process-file-name'. (See the way that
-    ;; function is used in the language files)
-    ))
+  ;;(let* ((processed-params (org-babel-process-params params))
+  ;;       ;; set the session if the session variable is non-nil
+  ;;       (session (org-babel-template-initiate-session (first processed-params)))
+  ;;       ;; variables assigned for use in the block
+  ;;       (vars (second processed-params))
+  ;;       (result-params (third processed-params))
+  ;;       ;; either OUTPUT or VALUE which should behave as described above
+  ;;       (result-type (fourth processed-params))
+  ;;       ;; expand the body with `org-babel-expand-body:org-if'
+  ;;       (full-body (org-babel-expand-body:org-if
+  ;;                   body params processed-params)))
+  ;;  ;; actually execute the source-code block either in a session or
+  ;;  ;; possibly by dropping it to a temporary file and evaluating the
+  ;;  ;; file.
+  ;;  ;; 
+  ;;  ;; for session based evaluation the functions defined in
+  ;;  ;; `org-babel-comint' will probably be helpful.
+  ;;  ;;
+  ;;  ;; for external evaluation the functions defined in
+  ;;  ;; `org-babel-eval' will probably be helpful.
+  ;;  ;;
+  ;;  ;; when forming a shell command, or a fragment of code in some
+  ;;  ;; other language, please preprocess any file names involved with
+  ;;  ;; the function `org-babel-process-file-name'. (See the way that
+  ;;  ;; function is used in the language files)
+  ;;  (org-if-interpret body))
+  (org-if-interpret body))
 
-;; This function should be used to assign any variables in params in
-;; the context of the session environment.
-(defun org-babel-prep-session:org-if (session params)
-  "Prepare SESSION according to the header arguments specified in PARAMS."
-  )
-
-(defun org-babel-if-var-to-template (var)
-  "Convert an elisp var into a string of template source code
-specifying a var of the same value."
-  (format "%S" var))
-
-(defun org-babel-if-table-or-string (results)
-  "If the results look like a table, then convert them into an
-Emacs-lisp table, otherwise return the results as a string."
-  results)
+;;;; This function should be used to assign any variables in params in
+;;;; the context of the session environment.
+;;(defun org-babel-prep-session:org-if (session params)
+;;  "Prepare SESSION according to the header arguments specified in PARAMS."
+;;  )
+;;
+;;(defun org-babel-if-var-to-template (var)
+;;  "Convert an elisp var into a string of template source code
+;;specifying a var of the same value."
+;;  (format "%S" var))
+;;
+;;(defun org-babel-if-table-or-string (results)
+;;  "If the results look like a table, then convert them into an
+;;Emacs-lisp table, otherwise return the results as a string."
+;;  results)
 
 ;;(defun org-babel-template-initiate-session (&optional session)
 ;;  "If there is not a current inferior-process-buffer in SESSION then create.
@@ -149,5 +150,5 @@ Emacs-lisp table, otherwise return the results as a string."
 ;;  (unless (string= session "none")
 ;;    ))
 
-(provide 'ob-template)
-;;; ob-template.el ends here
+(provide 'ob-org-if)
+;;; ob-org-if.el ends here
