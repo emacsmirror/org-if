@@ -1,10 +1,8 @@
-;;; org-if-mode.el --- Major mode for ORG-IF
+;;; org-if-mode.el --- Major mode for org-if
 
 ;; Copyright © 2015 Philip Woods
 
 ;; Author: Philip Woods <elzairthesorcerer@gmail.com>
-;; Version: 0.1
-;; Keywords: lang syntax
 
 ;; This file is not part of GNU Emacs.
 
@@ -23,7 +21,9 @@
 
 ;;; Commentary:
 
-;; Syntax highlighting for ORG-IF code
+;; This file defines the major mode org-if-mode for the purposes of
+;; syntax highlighting. You should never create a .org-if file.
+;; This is only to make org-babel src blocks highlight org-if code correctly.
 
 ;;; Code:
 

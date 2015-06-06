@@ -1,5 +1,27 @@
 ;;; org-if-interpreter.el --- Interpreter for org-if language.
+
+;; Copyright © 2015 Philip Woods
+
+;; Author: Philip Woods <elzairthesorcerer@gmail.com>
+
+;; This file is not part of GNU Emacs.
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 ;;; Commentary:
+
+;;; This file contains the interpreter for the org-if language.
 
 ;;; Code:
 
@@ -22,7 +44,7 @@
         (org-if-goto-first-heading)
         (org-forward-heading-same-level 1)
         (open-line 1)
-        (insert (car args)))
+        (insert (concat (car args) "\n")))
       (error "Invalid arguments to print: " (prin1-to-string args))))
 
 (defun org-if-insert-choice (args)
@@ -42,7 +64,7 @@
                         (nth 0 args)
                         "\"))]["
                         (nth 1 args)
-                        "]]")))
+                        "]]\n")))
       (error "Invalid arguments to choice: " (prin1-to-string args))))
 
 (defun org-if-apply (func args num)
