@@ -34,6 +34,7 @@
 (require 'org-if-misc)
 (require 'org-if-mode)
 
+(defgroup org-if nil "Interactive Fiction Authoring System for Org-Mode.")
 
 (defvar org-if-old-babel-evaluate
   nil
