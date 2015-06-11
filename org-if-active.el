@@ -33,12 +33,6 @@
 (require 'org-if-misc)
 (require 'outline)
 
-(defvar org-if-old-babel-evaluate
-  nil
-  "Container for value of `org-confirm-babel-evaluate'.")
-(defvar org-if-old-elisp-link-function
-  nil
-  "Container for value of `org-confirm-elisp-link-function'.")
 (defvar org-if-old-load-languages
   nil
   "Container for value of `org-babel-load-languages'.")
@@ -87,30 +81,27 @@ This keeps babel from pestering the user with confirmation checks everytime they
   :init-value nil
   :lighter    " Org-IF Active"
   :global     t
-  ;:group      org-if
   (if org-if-active-mode
-      (progn
-        (setf org-if-old-babel-evaluate org-confirm-babel-evalute)
-        (setf org-confirm-babel-evalute #'org-if-confirm-babel-evaluate)
-        (setf org-if-old-elisp-link-function org-confirm-elisp-link-function)
-        (setf org-confirm-elisp-link-function #'org-if-confirm-elisp-link-function)
-        (setf org-if-old-load-languages org-babel-load-languages)
-        (org-babel-do-load-languages
-         'org-babel-load-languages
-         '((org-if . t)))
-        (add-hook 'org-mode-hook 'org-if-org-mode-hook)
-        (when (eq major-mode 'org-mode)
-          (org-if-org-mode-hook)))
-      (progn
-        (setf org-confirm-babel-evalute org-if-old-babel-evaluate)
-        (setf org-if-confirm-babel-evaluate nil)
-        (setf org-confirm-elisp-link-function org-if-old-elisp-link-function)
-        (setf org-if-confirm-elisp-link-function nil)
-        (org-babel-do-load-languages
-         'org-babel-load-languages
-         org-if-old-load-languages)
-        (widen)
-        (remove-hook 'org-mode-hook 'org-if-org-mode-hook))))
+    (progn
+      (customize-set-variable 'org-confirm-babel-evaluate
+                              (function org-if-confirm-babel-evaluate))
+      (customize-set-variable 'org-confirm-elisp-link-function
+                              (function org-if-confirm-elisp-link-function))
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((org-if . t)))
+      (add-hook 'org-mode-hook 'org-if-org-mode-hook)
+      (when (eq major-mode 'org-mode)
+        (org-if-org-mode-hook)))
+    (progn
+      (customize-set-variable 'org-confirm-babel-evaluate      t)
+      (customize-set-variable 'org-confirm-elisp-link-function t)
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       org-if-old-load-languages)
+      (remove-hook 'org-mode-hook 'org-if-org-mode-hook)
+      (when (eq major-mode 'org-mode)
+        (widen)))))
 
 (provide 'org-if-active)
 ;;; org-if-active.el ends here
