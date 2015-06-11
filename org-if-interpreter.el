@@ -29,13 +29,13 @@
 
 (require 'org-if-misc)
 
-(defvar org-if-current-game nil "Reference to current org-if game.")
+(defvar org-if-current-env nil "Reference to current org-if game.")
 
-(defun org-if-visit-next-file (name)
-    "Visit the file NAME and delete the current buffer to prevent a cached version from displaying."
-  (let ((curbuf (buffer-name (current-buffer))))
-    (find-file name)
-    (kill-buffer curbuf)))
+;(defun org-if-visit-next-file (name)
+;    "Visit the file NAME and delete the current buffer to prevent a cached version from displaying."
+;  (let ((curbuf (buffer-name (current-buffer))))
+;    (find-file name)
+;    (kill-buffer curbuf)))
 
 (defun org-if-insert-message (args)
     "Insert message from ARGS into Text heading."
@@ -79,15 +79,15 @@ Ensure function has NUM arguments."
 (defun org-if-reset-game (args)
   "Initialize game with name taken from ARGS."
   (if (and (eq (length args) 1) (stringp (nth 0 args)))
-      (setq org-if-current-game (name (nth 0 args)))))
+      (setq org-if-current-env (name (nth 0 args)))))
 
 (defun org-if-eval (exp)
-  "Evaluate expression EXP in `org-if-current-game'."
+  "Evaluate expression EXP in `org-if-current-env'."
   (cond
-   ((symbolp exp)            (plist-get org-if-current-game exp))
+   ((symbolp exp)            (plist-get org-if-current-env exp))
    ((atom    exp)            exp)
-   ((eq (nth 0 exp) 'set)    (setq org-if-current-game
-                                   (plist-put org-if-current-game
+   ((eq (nth 0 exp) 'set)    (setq org-if-current-env
+                                   (plist-put org-if-current-env
                                               (nth 1 exp)
                                               (org-if-eval (nth 2 exp)))))
    ((eq (nth 0 exp) 'if)     (if (org-if-eval (nth 1 exp))
