@@ -31,6 +31,7 @@
 
 (require 'generic-x)
 
+;;;###autoload
 (define-generic-mode
   'org-if-mode
   '(";")

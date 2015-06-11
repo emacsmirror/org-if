@@ -27,6 +27,11 @@
 
 (setq lexical-binding t) ; Enable lexical binding
 
+(defgroup org-if
+  nil
+  "Interactive Fiction Authoring System for Org-Mode."
+  :group 'applications)
+
 (defun org-if-goto-first-heading ()
   "Go to the line containing the first major heading in the current buffer."
   (goto-char (point-min))

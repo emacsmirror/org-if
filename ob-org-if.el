@@ -38,6 +38,7 @@
 
 ;; This is the main function which is called to evaluate a code
 ;; block.
+;;;###autoload
 (defun org-babel-execute:org-if (body params)
   "Execute a block of ORG-IF code with org-babel.
 This function is called by `org-babel-execute-src-block'"
