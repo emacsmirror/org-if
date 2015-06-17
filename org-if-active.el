@@ -43,6 +43,7 @@
   (interactive)
   (org-if-goto-first-heading)
   (org-forward-heading-same-level 2)
+  (message (pp-to-string org-mark-ring))
   (narrow-to-region (point-min) (point)))
 
 (defun org-if-confirm-babel-evaluate (lang body)
@@ -62,8 +63,8 @@ they visit a new file."
     (setf org-if-old-env   org-if-current-env)
     (show-all)
     (org-babel-execute-buffer)
-    (set-buffer-modified-p nil)
-    (org-if-hide-code))
+    (org-if-hide-code)
+    (set-buffer-modified-p nil))
 
 ;;;###autoload
 (define-minor-mode org-if-active-mode
@@ -79,6 +80,7 @@ they visit a new file."
        'org-babel-load-languages
        '((org-if . t)))
       (add-hook 'org-mode-hook 'org-if-org-mode-hook)
+      (add-hook 'org-follow-link-hook 'org-if-hide-code)
       (when (eq major-mode 'org-mode)
         (org-if-org-mode-hook)))
     (progn
@@ -87,6 +89,7 @@ they visit a new file."
        'org-babel-load-languages
        org-if-old-load-languages)
       (remove-hook 'org-mode-hook 'org-if-org-mode-hook)
+      (remove-hook 'org-follow-link-hook 'org-if-hide-code)
       (when (eq major-mode 'org-mode)
         (widen)))))
 
