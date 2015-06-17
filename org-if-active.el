@@ -40,10 +40,8 @@
 
 (defun org-if-hide-code ()
   "Hide all but the first two headings in org file."
-  (interactive)
   (org-if-goto-first-heading)
   (org-forward-heading-same-level 2)
-  (message (pp-to-string org-mark-ring))
   (narrow-to-region (point-min) (point)))
 
 (defun org-if-confirm-babel-evaluate (lang body)
