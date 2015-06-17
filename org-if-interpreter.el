@@ -41,7 +41,6 @@
 
 (defun org-if-insert-choice (args)
   "Insert link from ARGS into Choices heading."
-  (message (nth 0 args))
   (let* ((link-path      (nth    0 args))
          (link-with-ext  (if (null (file-name-extension link-path))
                               (concat link-path ".org")
