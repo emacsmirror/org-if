@@ -31,7 +31,8 @@
   nil
   "This is the current file when `org-if-active-mode' is enabled.")
 
-(defvar org-if-current-env nil "Reference to current org-if environment.")
+(defvar org-if-current-env (make-hash-table)
+  "Reference to current org-if environment.")
 
 (defvar org-if-old-env nil "Reference to previous org-if environment.")
 
@@ -58,12 +59,9 @@ to the current file, if appropriate.
 Remove all link states from `org-if-link-states' after setting new state values."
   (flet ((helper (vars)
                  (when (not (null vars))
-                   (let ((var (nth 0 vars))
+                   (let ((key (nth 0 vars))
                          (val (nth 1 vars)))
-                     (setq org-if-current-env
-                           (plist-put org-if-current-env
-                                      var
-                                      (org-if-eval val))))
+                     (puthash key (org-if-eval val) org-if-current-env))
                    (helper (nthcdr 2 vars)))))
     (let ((link-state (gethash (intern current-file-name) org-if-link-state)))
       (helper link-state)))

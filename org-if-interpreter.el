@@ -76,19 +76,19 @@ Ensure function has NUM arguments."
     (error (concat "Invalid function arguments: " (prin1-to-string args)))))
 
 (defun org-if-reset-game (args)
-  "Initialize game with name taken from ARGS."
-  (if (and (eq (length args) 1) (stringp (nth 0 args)))
-      (setq org-if-current-env (name (nth 0 args)))))
+  "Initialize game with ARGS."
+  (if (null args)
+      (clrhash org-if-current-env)
+      (error "Invalid reset arguments: " (print1-to-string args))))
 
 (defun org-if-eval (exp)
   "Evaluate expression EXP in `org-if-current-env'."
   (cond
    ((symbolp exp)            (plist-get org-if-current-env exp))
    ((atom    exp)            exp)
-   ((eq (nth 0 exp) 'set)    (setq org-if-current-env
-                                   (plist-put org-if-current-env
-                                              (nth 1 exp)
-                                              (org-if-eval (nth 2 exp)))))
+   ((eq (nth 0 exp) 'set)    (puthash (intern (nth 1 exp))
+                                      (org-if-eval (nth 2 exp))
+                                      org-if-current-env))
    ((eq (nth 0 exp) 'if)     (if (org-if-eval (nth 1 exp))
                                  (org-if-eval (nth 2 exp))
                                (when (not (eq (nthcdr 2 exp) '()))
