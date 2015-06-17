@@ -56,7 +56,8 @@ they visit a new file."
                (get-file-buffer org-if-current-file))
       (kill-buffer (get-file-buffer org-if-current-file)))
     (setf org-if-current-file (file-truename buffer-file-name))
-    ; Set link state before 
+    ; Set link state before setting old-env so if a player resumes
+    ; from here the state will match
     (org-if-set-link-state org-if-current-file)
     (setf org-if-old-env   org-if-current-env)
     (show-all)
