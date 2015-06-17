@@ -62,6 +62,7 @@ they visit a new file."
     (setf org-if-old-env   org-if-current-env)
     (show-all)
     (org-babel-execute-buffer)
+    (set-buffer-modified-p nil)
     (org-if-hide-code))
 
 ;;;###autoload
