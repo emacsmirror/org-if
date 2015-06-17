@@ -27,6 +27,8 @@
 
 (setq lexical-binding t) ; Enable lexical binding
 
+(require 'cl-macs)
+
 (defvar org-if-current-file
   nil
   "This is the current file when `org-if-active-mode' is enabled.")
@@ -57,12 +59,12 @@
 Use variables and values from the link in `org-if-link-states' corresponding
 to the current file, if appropriate.
 Remove all link states from `org-if-link-states' after setting new state values."
-  (flet ((helper (vars)
-                 (when (not (null vars))
-                   (let ((key (nth 0 vars))
-                         (val (nth 1 vars)))
-                     (puthash key (org-if-eval val) org-if-current-env))
-                   (helper (nthcdr 2 vars)))))
+  (cl-labels ((helper (vars)
+                    (when (not (null vars))
+                      (let ((key (nth 0 vars))
+                            (val (nth 1 vars)))
+                        (puthash key (org-if-eval val) org-if-current-env))
+                      (helper (nthcdr 2 vars)))))
     (let ((link-state (gethash (intern current-file-name) org-if-link-state)))
       (helper link-state)))
   (clrhash org-if-link-state))
