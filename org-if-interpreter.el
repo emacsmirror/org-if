@@ -78,7 +78,7 @@ Ensure function has NUM arguments."
   "Initialize game with ARGS."
   (if (null args)
       (clrhash org-if-current-env)
-      (error "Invalid reset arguments: " (print1-to-string args))))
+      (error "Invalid reset arguments: " (prin1-to-string args))))
 
 (defun org-if-eval (exp)
   "Evaluate expression EXP in `org-if-current-env'."
