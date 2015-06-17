@@ -31,6 +31,7 @@
 (require 'ob-core)
 (require 'org)
 (require 'org-if-misc)
+(require 'org-if-interpreter)
 (require 'outline)
 
 (defvar org-if-old-load-languages
@@ -44,33 +45,21 @@
   (org-forward-heading-same-level 2)
   (narrow-to-region (point-min) (point)))
 
-(defun org-if-kill-all-other-org-buffers ()
-  "Kill all other `org-mode' buffers except for the current buffer."
-  (let* ((buflist (remove-if #'(lambda (b) (eq b (current-buffer)))
-                             (buffer-list)))
-         (bwithm  (mapcar #'(lambda (buf)
-                              (cons (buffer-name buf)
-                                    (with-current-buffer buf major-mode)))
-                          buflist))
-         (orgs    (remove-if #'null
-                             (mapcar #'(lambda (buf)
-                                         (when (eq (cdr buf) 'org-mode)
-                                           (car buf)))
-                                     bwithm))))
-    (mapcar #'kill-buffer orgs)))
-
 (defun org-if-confirm-babel-evaluate (lang body)
     "Replacement for `org-confirm-babel-evaluate' when mode is on.
-This keeps babel from pestering the user with confirmation checks everytime they visit a new file."
-    (not (string= lang "org-if")))
-
-(defun org-if-confirm-elisp-link-function (lang body)
-    "Replacement for `org-confirm-elisp-link-function' when mode is on.
-This keeps babel from pestering the user with confirmation checks everytime they follow a link."
+This keeps babel from pestering the user with confirmation checks every time 
+they visit a new file."
     (not (string= lang "org-if")))
 
 (defun org-if-org-mode-hook ()
     "This is the `org-mode-hook' run by `org-if-active-mode'."
+    (when (and org-if-current-file
+               (get-file-buffer org-if-current-file))
+      (kill-buffer (get-file-buffer org-if-current-file)))
+    (setf org-if-current-file (file-truename buffer-file-name))
+    ; Set link state before 
+    (org-if-set-link-state org-if-current-file)
+    (setf org-if-old-env   org-if-current-env)
     (show-all)
     (org-babel-execute-buffer)
     (org-if-hide-code))
@@ -85,8 +74,6 @@ This keeps babel from pestering the user with confirmation checks everytime they
     (progn
       (customize-set-variable 'org-confirm-babel-evaluate
                               (function org-if-confirm-babel-evaluate))
-      (customize-set-variable 'org-confirm-elisp-link-function
-                              (function org-if-confirm-elisp-link-function))
       (org-babel-do-load-languages
        'org-babel-load-languages
        '((org-if . t)))
@@ -95,7 +82,6 @@ This keeps babel from pestering the user with confirmation checks everytime they
         (org-if-org-mode-hook)))
     (progn
       (customize-set-variable 'org-confirm-babel-evaluate      t)
-      (customize-set-variable 'org-confirm-elisp-link-function t)
       (org-babel-do-load-languages
        'org-babel-load-languages
        org-if-old-load-languages)

@@ -27,6 +27,17 @@
 
 (setq lexical-binding t) ; Enable lexical binding
 
+(defvar org-if-current-file
+  nil
+  "This is the current file when `org-if-active-mode' is enabled.")
+
+(defvar org-if-current-env nil "Reference to current org-if environment.")
+
+(defvar org-if-old-env nil "Reference to previous org-if environment.")
+
+(defvar org-if-link-state (make-hash-table)
+  "Store of `org-if-current-env' variables to set for each followed link.")
+
 (defgroup org-if
   nil
   "Interactive Fiction Authoring System for Org-Mode."
@@ -35,9 +46,28 @@
 (defun org-if-goto-first-heading ()
   "Go to the line containing the first major heading in the current buffer."
   (goto-char (point-min))
-  (while (not (equal "* " (buffer-substring-no-properties (line-beginning-position)
-                                                          (+ 2 (line-beginning-position)))))
+  (while (not (equal "* "
+                     (buffer-substring-no-properties (line-beginning-position)
+                                                     (+ 2 (line-beginning-position)))))
     (forward-line 1)))
+
+(defun org-if-set-link-state (current-file-name)
+  "Set the new state of `org-if-current-env' with values from CURRENT-FILE-NAME.
+Use variables and values from the link in `org-if-link-states' corresponding
+to the current file, if appropriate.
+Remove all link states from `org-if-link-states' after setting new state values."
+  (flet ((helper (vars)
+                 (when (not (null vars))
+                   (let ((var (nth 0 vars))
+                         (val (nth 1 vars)))
+                     (setq org-if-current-env
+                           (plist-put org-if-current-env
+                                      var
+                                      (org-if-eval val))))
+                   (helper (nthcdr 2 vars)))))
+    (let ((link-state (gethash (intern current-file-name) org-if-link-state)))
+      (helper link-state)))
+  (clrhash org-if-link-state))
 
 (provide 'org-if-misc)
 ;;; org-if-misc.el ends here

@@ -29,14 +29,6 @@
 
 (require 'org-if-misc)
 
-(defvar org-if-current-env nil "Reference to current org-if game.")
-
-;(defun org-if-visit-next-file (name)
-;    "Visit the file NAME and delete the current buffer to prevent a cached version from displaying."
-;  (let ((curbuf (buffer-name (current-buffer))))
-;    (find-file name)
-;    (kill-buffer curbuf)))
-
 (defun org-if-insert-message (args)
     "Insert message from ARGS into Text heading."
     (if (and (eq (length args) 1) (stringp (car args)))
@@ -48,24 +40,31 @@
       (error "Invalid arguments to print: " (prin1-to-string args))))
 
 (defun org-if-insert-choice (args)
-    "Insert link from ARGS into Choices heading."
-    (if (and (>= (length args) 2)   (<= (length args) 3)
-             (stringp (nth 0 args)) (stringp (nth 1 args))
-             (or (consp (nth 2 args)) (null (nth 2 args))))
-      (save-excursion
-        (org-if-goto-first-heading)
-        (org-forward-heading-same-level 2)
-        (open-line 1)
-        (insert (concat "[[elisp:(progn "
-                        (when (consp (nth 2 args))
-                          (prin1-to-string `(org-if-eval
-                                             ,(nth 2 args))))
-                        "(org-if-visit-next-file \""
-                        (nth 0 args)
-                        "\"))]["
-                        (nth 1 args)
-                        "]]\n")))
-      (error "Invalid arguments to choice: " (prin1-to-string args))))
+  "Insert link from ARGS into Choices heading."
+  (message (nth 0 args))
+  (let* ((link-path      (nth    0 args))
+         (link-with-ext  (if (null (file-name-extension link-path))
+                              (concat link-path ".org")
+                              link-path))
+         (link-full-path (expand-file-name (concat (file-name-directory buffer-file-name)
+                                                   link-with-ext)))
+         (link-desc      (nth    1 args))
+         (link-state     (nthcdr 2 args)))
+    (if (and (>= (length args) 2)  (zerop   (% (length args) 2))
+             (stringp link-path)   (stringp link-desc)
+             (or (consp link-state) (null link-state)))
+        (progn
+          (save-excursion
+            (org-if-goto-first-heading)
+            (org-forward-heading-same-level 2)
+            (open-line 1)
+            (insert (concat "[[file:"
+                            link-full-path
+                            "]["
+                            link-desc
+                            "]]\n")))
+          (puthash (intern link-full-path) link-state org-if-link-state))
+      (error "Invalid arguments to choice: " (prin1-to-string args)))))
 
 (defun org-if-apply (func args num)
   "Call function FUNC with arguments ARGS.
