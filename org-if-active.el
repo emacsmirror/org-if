@@ -31,6 +31,7 @@
 (require 'ob-core)
 (require 'org)
 (require 'org-if-misc)
+(require 'org-if-link)
 (require 'org-if-interpreter)
 (require 'outline)
 
