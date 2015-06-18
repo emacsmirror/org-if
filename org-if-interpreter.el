@@ -57,13 +57,15 @@
             (org-if-goto-first-heading)
             (org-forward-heading-same-level 2)
             (open-line 1)
-            (insert (concat "[[file:"
+            (insert (concat "[[if:"
                             link-full-path
+                            (if (not (null link-state))
+                                (prin1-to-string link-state)
+                                "()")
                             "]["
                             link-desc
-                            "]]\n")))
-          (puthash (intern link-full-path) link-state org-if-link-state))
-      (error "Invalid arguments to choice: " (prin1-to-string args)))))
+                            "]]\n"))))
+        (error "Invalid arguments to choice: " (prin1-to-string args)))))
 
 (defun org-if-apply (func args num)
   "Call function FUNC with arguments ARGS.

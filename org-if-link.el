@@ -1,9 +1,8 @@
-;;; org-if.el --- Interactive Fiction Authoring System for Org-Mode
+;;; org-if-link.el --- org-if hyperlink
 
 ;; Copyright © 2015 Philip Woods
 
 ;; Author: Philip Woods <elzairthesorcerer@gmail.com>
-;; Keywords: if, org-if, org org-mode
 
 ;; This file is not part of GNU Emacs.
 
@@ -22,21 +21,28 @@
 
 ;;; Commentary:
 
-;; This package helps you create Choose Your Own Adventure stye Interactive
-;; Fiction using Emacs and Org-Mode.
+;;; This file defines the custom org-if hyperlink.
 
 ;;; Code:
 
 (setq lexical-binding t) ; Enable lexical binding
 
-(require 'ob-org-if)
-(require 'org-if-active)
-(require 'org-if-interpreter)
-(require 'org-if-link)
+(require 'cl-macs)
+(require 'org)
 (require 'org-if-misc)
-(require 'org-if-mode)
 
+(defun org-if-open (link)
+    "Open the org-if file and set the variables specified by LINK.
+LINK should be in the form if:file.org(var val ...)."
+  (let* ((sexp-begin (string-match "(" link))
+         (file       (substring link 0 sexp-begin))
+         (sexp       (substring link sexp-begin))
+         (vars       (read-from-string sexp)))
+    (when (not (null (car vars)))
+      (org-if-set-link-state (car vars)))
+    (find-file file)))
 
+(org-add-link-type "if" 'org-if-open)
 
-(provide 'org-if)
-;;; org-if.el ends here
+(provide 'org-if-link)
+;;; org-if-link.el ends here

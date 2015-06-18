@@ -38,6 +38,8 @@
   nil
   "Container for value of `org-babel-load-languages'.")
 
+(defvar org-if-began nil "Whether or not org-if-active has just been enabled.")
+
 (defun org-if-hide-code ()
   "Hide all but the first two headings in org file."
   (org-if-goto-first-heading)
@@ -56,13 +58,12 @@ they visit a new file."
                (get-file-buffer org-if-current-file))
       (kill-buffer (get-file-buffer org-if-current-file)))
     (setf org-if-current-file (file-truename buffer-file-name))
-    ; Set link state before setting old-env so if a player resumes
-    ; from here the state will match
-    (org-if-set-link-state org-if-current-file)
     (setf org-if-old-env   org-if-current-env)
     (show-all)
     (org-babel-execute-buffer)
-    (org-if-hide-code)
+    (when org-if-began
+      (org-if-hide-code)
+      (setf org-if-began nil))
     (set-buffer-modified-p nil))
 
 ;;;###autoload
@@ -73,6 +74,7 @@ they visit a new file."
   :global     t
   (if org-if-active-mode
     (progn
+      (setf org-if-began t)
       (customize-set-variable 'org-confirm-babel-evaluate
                               (function org-if-confirm-babel-evaluate))
       (org-babel-do-load-languages
@@ -83,6 +85,7 @@ they visit a new file."
       (when (eq major-mode 'org-mode)
         (org-if-org-mode-hook)))
     (progn
+      (setf org-if-began nil)
       (customize-set-variable 'org-confirm-babel-evaluate      t)
       (org-babel-do-load-languages
        'org-babel-load-languages
@@ -91,6 +94,18 @@ they visit a new file."
       (remove-hook 'org-follow-link-hook 'org-if-hide-code)
       (when (eq major-mode 'org-mode)
         (widen)))))
+
+;;;###autoload
+(defun activate-org-if ()
+    "Activate org-if-active minor-mode."
+    (interactive)
+    (org-if-active-mode 1))
+
+;;;###autoload
+(defun deactivate-org-if ()
+    "Deactivate org-if-active minor-mode."
+    (interactive)
+    (org-if-active-mode 0))
 
 (provide 'org-if-active)
 ;;; org-if-active.el ends here

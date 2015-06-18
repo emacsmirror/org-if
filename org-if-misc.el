@@ -27,6 +27,7 @@
 
 (setq lexical-binding t) ; Enable lexical binding
 
+(require 'cl)
 (require 'cl-macs)
 
 (defvar org-if-current-file
@@ -37,9 +38,6 @@
   "Reference to current org-if environment.")
 
 (defvar org-if-old-env nil "Reference to previous org-if environment.")
-
-(defvar org-if-link-state (make-hash-table)
-  "Store of `org-if-current-env' variables to set for each followed link.")
 
 (defgroup org-if
   nil
@@ -54,20 +52,18 @@
                                                      (+ 2 (line-beginning-position)))))
     (forward-line 1)))
 
-(defun org-if-set-link-state (current-file-name)
-  "Set the new state of `org-if-current-env' with values from CURRENT-FILE-NAME.
-Use variables and values from the link in `org-if-link-states' corresponding
-to the current file, if appropriate.
-Remove all link states from `org-if-link-states' after setting new state values."
+(defun org-if-set-link-state (list)
+  "Set the new state of `org-if-current-env' with values from LIST."
   (cl-labels ((helper (vars)
                     (when (not (null vars))
                       (let ((key (nth 0 vars))
                             (val (nth 1 vars)))
                         (puthash key (org-if-eval val) org-if-current-env))
                       (helper (nthcdr 2 vars)))))
-    (let ((link-state (gethash (intern current-file-name) org-if-link-state)))
-      (helper link-state)))
-  (clrhash org-if-link-state))
+    (if (evenp (length list))
+        (helper list)
+      (error (concat "Invalid parameters passed to `org-if-set-link-state': "
+                     (prin1-to-string list))))))
 
 (provide 'org-if-misc)
 ;;; org-if-misc.el ends here
