@@ -1,4 +1,4 @@
-;;; org-if-interpreter.el --- Interpreter for org-if language.
+;;; org-if-interpreter.el --- Interpreter for org-if language. -*- lexical-binding: t -*-
 
 ;; Copyright © 2015 Philip Woods
 
@@ -24,8 +24,6 @@
 ;;; This file contains the interpreter for the org-if language.
 
 ;;; Code:
-
-(setq lexical-binding t) ; Enable lexical binding
 
 (require 'org-if-misc)
 

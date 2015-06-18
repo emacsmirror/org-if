@@ -1,4 +1,4 @@
-;;; org-if-link.el --- org-if hyperlink
+;;; org-if-link.el --- org-if hyperlink -*- lexical-binding: t -*-
 
 ;; Copyright © 2015 Philip Woods
 
@@ -24,8 +24,6 @@
 ;;; This file defines the custom org-if hyperlink.
 
 ;;; Code:
-
-(setq lexical-binding t) ; Enable lexical binding
 
 (require 'cl-macs)
 (require 'org)

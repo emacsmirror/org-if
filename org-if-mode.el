@@ -1,4 +1,4 @@
-;;; org-if-mode.el --- Major mode for org-if
+;;; org-if-mode.el --- Major mode for org-if -*- lexical-binding: t -*-
 
 ;; Copyright © 2015 Philip Woods
 
@@ -26,8 +26,6 @@
 ;; This is only to make org-babel src blocks highlight org-if code correctly.
 
 ;;; Code:
-
-(setq lexical-binding t) ; Enable lexical binding
 
 (require 'generic-x)
 

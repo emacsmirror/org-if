@@ -1,4 +1,4 @@
-;;; org-if-active.el --- Active mode for org-if
+;;; org-if-active.el --- Active mode for org-if -*- lexical-binding: t -*-
 
 ;; Copyright © 2015 Philip Woods
 

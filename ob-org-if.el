@@ -1,4 +1,4 @@
-;;; ob-template.el --- org-babel functions for template evaluation
+;;; ob-template.el --- org-babel functions for template evaluation -*- lexical-binding: t -*-
 
 ;; Copyright © 2015 Philip Woods
 

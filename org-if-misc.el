@@ -1,4 +1,4 @@
-;;; org-if-misc.el --- Miscellaneous functions for org-if-mode
+;;; org-if-misc.el --- Miscellaneous functions for org-if-mode -*- lexical-binding: t -*-
 
 ;; Copyright © 2015 Philip Woods
 
@@ -24,8 +24,6 @@
 ;;; This file contains miscellaneous functions for org-if-mode.
 
 ;;; Code:
-
-(setq lexical-binding t) ; Enable lexical binding
 
 (require 'cl)
 (require 'cl-macs)

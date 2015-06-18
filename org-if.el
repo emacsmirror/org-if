@@ -1,4 +1,4 @@
-;;; org-if.el --- Interactive Fiction Authoring System for Org-Mode
+;;; org-if.el --- Interactive Fiction Authoring System for Org-Mode -*- lexical-binding: t -*-
 
 ;; Copyright © 2015 Philip Woods
 
@@ -26,8 +26,6 @@
 ;; Fiction using Emacs and Org-Mode.
 
 ;;; Code:
-
-(setq lexical-binding t) ; Enable lexical binding
 
 (require 'ob-org-if)
 (require 'org-if-active)
