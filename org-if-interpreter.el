@@ -88,27 +88,31 @@
       (clrhash org-if-current-env)
       (error "Invalid reset arguments: " (prin1-to-string args))))
 
-(puthash '> #'> org-if-funcs)
-(puthash '< #'< org-if-funcs)
-(puthash '= #'= org-if-funcs)
-(puthash '+ #'+ org-if-funcs)
-(puthash '- #'- org-if-funcs)
-(puthash '* #'* org-if-funcs)
-(puthash '/ #'/ org-if-funcs)
-(puthash '>= #'>= org-if-funcs)
-(puthash '<= #'<= org-if-funcs)
-(puthash '!= #'(lambda (x) (not (equal x))) org-if-funcs)
-(puthash 'print #'org-if-insert-message org-if-funcs)
-(puthash 'reset #'org-if-reset-game org-if-funcs)
-
 (defun org-if-evlis (lst)
     "Evaluate every element of LST."
     (mapcar #'org-if-eval lst))
 
-(defun org-if-apply (func args)
+(defun org-if-apply (func args &optional args-as-is)
   "Call function FUNC with arguments ARGS.
-Ensure function has NUM arguments."
- (apply (gethash func org-if-funcs) (org-if-evlis args)))
+When the user specifies ARGS-AS-IS, ARGS are not evaluated."
+  (apply (gethash func org-if-funcs)
+         (if (null args-as-is)
+             (org-if-evlis args)
+             args)))
+
+(puthash '>     #'>                              org-if-funcs)
+(puthash '<     #'<                              org-if-funcs)
+(puthash '=     #'=                              org-if-funcs)
+(puthash '+     #'+                              org-if-funcs)
+(puthash '-     #'-                              org-if-funcs)
+(puthash '*     #'*                              org-if-funcs)
+(puthash '/     #'/                              org-if-funcs)
+(puthash '>=    #'>=                             org-if-funcs)
+(puthash '<=    #'<=                             org-if-funcs)
+(puthash '!=    #'(lambda (x)
+                    (not (org-if-apply '= x t))) org-if-funcs)
+(puthash 'print #'org-if-insert-message          org-if-funcs)
+(puthash 'reset #'org-if-reset-game              org-if-funcs)
 
 (defun org-if-eval (exp)
   "Evaluate expression EXP in `org-if-current-env'."
