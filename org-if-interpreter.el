@@ -27,6 +27,20 @@
 
 (require 'org-if-misc)
 
+(defun org-if-conditional (args)
+    "Conditionally evaluate the ARGS."
+    (cl-labels ((helper (as)
+                        (when (not (null as))
+                              (if (= (length as) 1)
+                                  (org-if-eval (nth 0 as))
+                                  (if (org-if-eval (nth 0 as))
+                                      (org-if-eval (nth 1 as))
+                                      (helper (nthcdr 2 as)))))))
+      (if (>= (length args) 2)
+          (helper args)
+          (error (concat "Invalid arguments to if: "
+                         (print1-to-string args))))))
+
 (defun org-if-insert-message (args)
     "Insert message from ARGS into Text heading."
     (if (and (eq (length args) 1) (stringp (car args)))
@@ -65,20 +79,20 @@
                             "]]\n"))))
         (error "Invalid arguments to choice: " (prin1-to-string args)))))
 
-(defun org-if-apply (func args num)
-  "Call function FUNC with arguments ARGS.
-Ensure function has NUM arguments."
-  (if (eq (length args) num)
-    (apply func
-           (mapcar #'(lambda (arg)
-                   (org-if-eval arg)) args))
-    (error (concat "Invalid function arguments: " (prin1-to-string args)))))
-
 (defun org-if-reset-game (args)
   "Initialize game with ARGS."
   (if (null args)
       (clrhash org-if-current-env)
       (error "Invalid reset arguments: " (prin1-to-string args))))
+
+(defun org-if-evlis (lst)
+    "Evaluate every element of LST."
+    (mapcar #'org-if-eval lst))
+
+(defun org-if-apply (func args)
+  "Call function FUNC with arguments ARGS.
+Ensure function has NUM arguments."
+ (apply func (org-if-evlis args)))
 
 (defun org-if-eval (exp)
   "Evaluate expression EXP in `org-if-current-env'."
@@ -89,20 +103,17 @@ Ensure function has NUM arguments."
                                    val
                                  (error (concat "Invalid symbol: " exp)))))
    ((atom    exp)            exp)
-   ((eq (nth 0 exp) 'set)    (org-if-set-env (cdr exp)))
-   ((eq (nth 0 exp) 'if)     (if (org-if-eval (nth 1 exp))
-                                 (org-if-eval (nth 2 exp))
-                               (when (not (eq (nthcdr 2 exp) '()))
-                                 (org-if-eval (nth 3 exp)))))
-   ((eq (nth 0 exp) '>)      (org-if-apply #'>   (cdr exp) 2))
-   ((eq (nth 0 exp) '<)      (org-if-apply #'<   (cdr exp) 2))
-   ((eq (nth 0 exp) '=)      (org-if-apply #'eq  (cdr exp) 2))
-   ((eq (nth 0 exp) '+)      (org-if-apply #'+   (cdr exp) 2))
-   ((eq (nth 0 exp) '-)      (org-if-apply #'-   (cdr exp) 2))
-   ((eq (nth 0 exp) '*)      (org-if-apply #'*   (cdr exp) 2))
-   ((eq (nth 0 exp) '/)      (org-if-apply #'/   (cdr exp) 2))
-   ((eq (nth 0 exp) '>=)     (org-if-apply #'>=  (cdr exp) 2))
-   ((eq (nth 0 exp) '<=)     (org-if-apply #'<=  (cdr exp) 2))
+   ((eq (nth 0 exp) 'set)    (org-if-set-env     (cdr exp)))
+   ((eq (nth 0 exp) 'if)     (org-if-conditional (cdr exp)))
+   ((eq (nth 0 exp) '>)      (org-if-apply #'>   (cdr exp)))
+   ((eq (nth 0 exp) '<)      (org-if-apply #'<   (cdr exp)))
+   ((eq (nth 0 exp) '=)      (org-if-apply #'eq  (cdr exp)))
+   ((eq (nth 0 exp) '+)      (org-if-apply #'+   (cdr exp)))
+   ((eq (nth 0 exp) '-)      (org-if-apply #'-   (cdr exp)))
+   ((eq (nth 0 exp) '*)      (org-if-apply #'*   (cdr exp)))
+   ((eq (nth 0 exp) '/)      (org-if-apply #'/   (cdr exp)))
+   ((eq (nth 0 exp) '>=)     (org-if-apply #'>=  (cdr exp)))
+   ((eq (nth 0 exp) '<=)     (org-if-apply #'<=  (cdr exp)))
    ((eq (nth 0 exp) '!=)     (not (eq (org-if-eval (nth 1 exp))
                                       (org-if-eval (nth 2 exp)))))
    ((eq (nth 0 exp) 'print)  (org-if-insert-message (cdr exp)))
