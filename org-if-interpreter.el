@@ -27,6 +27,9 @@
 
 (require 'org-if-misc)
 
+(defvar org-if-funcs (make-hash-table)
+  "Listing of all the functions supplied by org-if.")
+
 (defun org-if-conditional (args)
     "Conditionally evaluate the ARGS."
     (cl-labels ((helper (as)
@@ -85,6 +88,19 @@
       (clrhash org-if-current-env)
       (error "Invalid reset arguments: " (prin1-to-string args))))
 
+(puthash '> #'> org-if-funcs)
+(puthash '< #'< org-if-funcs)
+(puthash '= #'= org-if-funcs)
+(puthash '+ #'+ org-if-funcs)
+(puthash '- #'- org-if-funcs)
+(puthash '* #'* org-if-funcs)
+(puthash '/ #'/ org-if-funcs)
+(puthash '>= #'>= org-if-funcs)
+(puthash '<= #'<= org-if-funcs)
+(puthash '!= #'(lambda (x) (not (equal x))) org-if-funcs)
+(puthash 'print #'org-if-insert-message org-if-funcs)
+(puthash 'reset #'org-if-reset-game org-if-funcs)
+
 (defun org-if-evlis (lst)
     "Evaluate every element of LST."
     (mapcar #'org-if-eval lst))
@@ -92,33 +108,27 @@
 (defun org-if-apply (func args)
   "Call function FUNC with arguments ARGS.
 Ensure function has NUM arguments."
- (apply func (org-if-evlis args)))
+ (apply (gethash func org-if-funcs) (org-if-evlis args)))
 
 (defun org-if-eval (exp)
   "Evaluate expression EXP in `org-if-current-env'."
   (cond
-   ((symbolp exp)            (let ((val (gethash exp
-                                                 org-if-current-env)))
-                               (if (not (null val))
-                                   val
-                                 (error (concat "Invalid symbol: " exp)))))
-   ((atom    exp)            exp)
-   ((eq (nth 0 exp) 'set)    (org-if-set-env     (cdr exp)))
-   ((eq (nth 0 exp) 'if)     (org-if-conditional (cdr exp)))
-   ((eq (nth 0 exp) '>)      (org-if-apply #'>   (cdr exp)))
-   ((eq (nth 0 exp) '<)      (org-if-apply #'<   (cdr exp)))
-   ((eq (nth 0 exp) '=)      (org-if-apply #'eq  (cdr exp)))
-   ((eq (nth 0 exp) '+)      (org-if-apply #'+   (cdr exp)))
-   ((eq (nth 0 exp) '-)      (org-if-apply #'-   (cdr exp)))
-   ((eq (nth 0 exp) '*)      (org-if-apply #'*   (cdr exp)))
-   ((eq (nth 0 exp) '/)      (org-if-apply #'/   (cdr exp)))
-   ((eq (nth 0 exp) '>=)     (org-if-apply #'>=  (cdr exp)))
-   ((eq (nth 0 exp) '<=)     (org-if-apply #'<=  (cdr exp)))
-   ((eq (nth 0 exp) '!=)     (not (eq (org-if-eval (nth 1 exp))
-                                      (org-if-eval (nth 2 exp)))))
-   ((eq (nth 0 exp) 'print)  (org-if-insert-message (cdr exp)))
-   ((eq (nth 0 exp) 'choice) (org-if-insert-choice  (cdr exp)))
-   ((eq (nth 0 exp) 'reset)  (org-if-reset-game     (cdr exp)))
+   ((symbolp exp)        (let ((val (gethash exp
+                                             org-if-current-env)))
+                           (if (not (null val))
+                               val
+                             (error (concat "Invalid symbol: " exp)))))
+   ((atom    exp)        exp)
+   ((and (consp exp)
+         (eq (nth 0 exp)
+             'set))      (org-if-set-env     (cdr exp)))
+   ((and (consp exp)
+         (eq (nth 0 exp)
+             'if))       (org-if-conditional (cdr exp)))
+   ((and (consp exp)
+         (eq (nth 0 exp)
+             'choice))   (org-if-insert-choice  (cdr exp)))
+   ((consp exp)          (org-if-apply (nth 0 exp) (nthcdr 1 exp)))
    (t (error (concat "Invalid expression: " (prin1-to-string exp))))))
 
 (defun org-if-interpret (str)
