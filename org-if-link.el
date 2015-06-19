@@ -37,7 +37,7 @@ LINK should be in the form if:file.org(var val ...)."
          (sexp       (substring link sexp-begin))
          (vars       (read-from-string sexp)))
     (when (not (null (car vars)))
-      (org-if-set-link-state (car vars)))
+      (org-if-set-env (car vars)))
     (find-file file)))
 
 (org-add-link-type "if" 'org-if-open)

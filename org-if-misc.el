@@ -50,7 +50,7 @@
                                                      (+ 2 (line-beginning-position)))))
     (forward-line 1)))
 
-(defun org-if-set-link-state (list)
+(defun org-if-set-env (list)
   "Set the new state of `org-if-current-env' with values from LIST."
   (cl-labels ((helper (vars)
                     (when (not (null vars))
@@ -60,7 +60,7 @@
                       (helper (nthcdr 2 vars)))))
     (if (evenp (length list))
         (helper list)
-      (error (concat "Invalid parameters passed to `org-if-set-link-state': "
+      (error (concat "Invalid parameters passed to `org-if-set-env': "
                      (prin1-to-string list))))))
 
 (provide 'org-if-misc)

@@ -83,11 +83,13 @@ Ensure function has NUM arguments."
 (defun org-if-eval (exp)
   "Evaluate expression EXP in `org-if-current-env'."
   (cond
-   ((symbolp exp)            (plist-get org-if-current-env exp))
+   ((symbolp exp)            (let ((val (gethash exp
+                                                 org-if-current-env)))
+                               (if (not (null val))
+                                   val
+                                 (error (concat "Invalid symbol: " exp)))))
    ((atom    exp)            exp)
-   ((eq (nth 0 exp) 'set)    (puthash (intern (nth 1 exp))
-                                      (org-if-eval (nth 2 exp))
-                                      org-if-current-env))
+   ((eq (nth 0 exp) 'set)    (org-if-set-env (cdr exp)))
    ((eq (nth 0 exp) 'if)     (if (org-if-eval (nth 1 exp))
                                  (org-if-eval (nth 2 exp))
                                (when (not (eq (nthcdr 2 exp) '()))
