@@ -45,7 +45,7 @@
                  args))))
 
 (defun org-if-insert-message (args)
-    "Insert message from ARGS into Text heading."
+    "Insert message from ARGS into first major heading."
     (if (and (eq (length args) 1) (stringp (car args)))
       (save-excursion
         (org-if-goto-first-heading)
@@ -55,7 +55,8 @@
       (error "Invalid arguments to print: %s" args)))
 
 (defun org-if-insert-choice (args)
-  "Insert link from ARGS into Choices heading."
+  "Insert link from ARGS into second major heading.
+ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 val1 ...])."
   (let* ((link-path      (nth    0 args))
          (link-with-ext  (if (null (file-name-extension link-path))
                               (concat link-path ".org")
@@ -83,14 +84,14 @@
         (error "Invalid arguments to choice: %s" args))))
 
 (defun org-if-reset-game (args)
-  "Initialize game with ARGS."
+  "Initialize game; ARGS should be nil."
   (if (null args)
       (clrhash org-if-current-env)
       (error "Command reset takes no arguments")))
 
-(defun org-if-evlis (lst)
-    "Evaluate every element of LST."
-    (mapcar #'org-if-eval lst))
+(defun org-if-evlis (list)
+    "Evaluate every expression in LIST."
+    (mapcar #'org-if-eval list))
 
 (defun org-if-getfunc (func)
     "Retrieve the function FUNC from `org-if-funcs'."
