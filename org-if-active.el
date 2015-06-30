@@ -26,8 +26,6 @@
 
 ;;; Code:
 
-(setq lexical-binding t) ; Enable lexical binding
-
 (require 'ob-core)
 (require 'org)
 (require 'org-if-misc)
