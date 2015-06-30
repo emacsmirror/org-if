@@ -92,27 +92,29 @@
     "Evaluate every element of LST."
     (mapcar #'org-if-eval lst))
 
-(defun org-if-apply (func args &optional args-as-is)
-  "Call function FUNC with arguments ARGS.
-When the user specifies ARGS-AS-IS, ARGS are not evaluated."
-  (apply (gethash func org-if-funcs)
-         (if (null args-as-is)
-             (org-if-evlis args)
-             args)))
+(defun org-if-getfunc (func)
+    "Retrieve the function FUNC from `org-if-funcs'."
+    (gethash func org-if-funcs))
 
-(puthash '>     #'>                              org-if-funcs)
-(puthash '<     #'<                              org-if-funcs)
-(puthash '=     #'=                              org-if-funcs)
-(puthash '+     #'+                              org-if-funcs)
-(puthash '-     #'-                              org-if-funcs)
-(puthash '*     #'*                              org-if-funcs)
-(puthash '/     #'/                              org-if-funcs)
-(puthash '>=    #'>=                             org-if-funcs)
-(puthash '<=    #'<=                             org-if-funcs)
+(defun org-if-apply (func args)
+  "Call function FUNC with arguments ARGS."
+  (apply (org-if-getfunc func)
+         (org-if-evlis   args)))
+
+(puthash '>     #'>                                 org-if-funcs)
+(puthash '<     #'<                                 org-if-funcs)
+(puthash '=     #'=                                 org-if-funcs)
+(puthash '+     #'+                                 org-if-funcs)
+(puthash '-     #'-                                 org-if-funcs)
+(puthash '*     #'*                                 org-if-funcs)
+(puthash '/     #'/                                 org-if-funcs)
+(puthash '>=    #'>=                                org-if-funcs)
+(puthash '<=    #'<=                                org-if-funcs)
 (puthash '!=    #'(lambda (x)
-                    (not (org-if-apply '= x t))) org-if-funcs)
-(puthash 'print #'org-if-insert-message          org-if-funcs)
-(puthash 'reset #'org-if-reset-game              org-if-funcs)
+                    (not (apply (org-if-getfunc '=)
+                                x)))                org-if-funcs)
+(puthash 'print #'org-if-insert-message             org-if-funcs)
+(puthash 'reset #'org-if-reset-game                 org-if-funcs)
 
 (defun org-if-eval (exp)
   "Evaluate expression EXP in `org-if-current-env'."
@@ -122,6 +124,10 @@ When the user specifies ARGS-AS-IS, ARGS are not evaluated."
                            (if (not (null val))
                                val
                              (error (concat "Invalid symbol: " exp)))))
+   ((integerp exp)       (if (and (>= exp (expt -2 29))
+                                  (<= exp (1- (expt 2 29))))
+                             exp
+                             (error (concat "Integer out of range: " exp))))
    ((atom    exp)        exp)
    ((and (consp exp)
          (eq (nth 0 exp)
