@@ -33,9 +33,14 @@
   "This is the current file when `org-if-active-mode' is enabled.")
 
 (defvar org-if-current-env (make-hash-table)
-  "Reference to current org-if environment.")
+  "Reference to org-if environment after code in current buffer has executed.")
 
-(defvar org-if-old-env nil "Reference to previous org-if environment.")
+(defvar org-if-old-env nil "Reference to org-if environment as it entered page.
+When saving is enabled, this environment will be the one saved.
+If the user saves on a page that modifies the environment,
+then when the user restores that same code will run twice.
+Therefore, we keep a copy of the environment as it was when
+a page was entered.")
 
 (defgroup org-if
   nil
@@ -43,7 +48,8 @@
   :group 'applications)
 
 (defun org-if-goto-first-heading ()
-  "Go to the line containing the first major heading in the current buffer."
+  "Go to the line containing the first major heading in the current buffer.
+Major heading start with *."
   (goto-char (point-min))
   (while (not (equal "* "
                      (buffer-substring-no-properties (line-beginning-position)
@@ -51,7 +57,8 @@
     (forward-line 1)))
 
 (defun org-if-set-env (list)
-  "Set the new state of `org-if-current-env' with values from LIST."
+  "Set the new state of `org-if-current-env' with values from LIST.
+LIST should be an even length list of the form (variable1 value1 ...)."
   (cl-labels ((helper (vars)
                     (when (not (null vars))
                       (let ((key (nth 0 vars))
