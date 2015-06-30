@@ -41,8 +41,8 @@
                                       (helper (nthcdr 2 as)))))))
       (if (>= (length args) 2)
           (helper args)
-          (error (concat "Invalid arguments to if: "
-                         (print1-to-string args))))))
+          (error "Invalid arguments to org-if: %s"
+                 args))))
 
 (defun org-if-insert-message (args)
     "Insert message from ARGS into Text heading."
@@ -52,7 +52,7 @@
         (org-forward-heading-same-level 1)
         (open-line 1)
         (insert (concat (car args) "\n")))
-      (error "Invalid arguments to print: " (prin1-to-string args))))
+      (error "Invalid arguments to print: %s" args)))
 
 (defun org-if-insert-choice (args)
   "Insert link from ARGS into Choices heading."
@@ -80,13 +80,13 @@
                             "]["
                             link-desc
                             "]]\n"))))
-        (error "Invalid arguments to choice: " (prin1-to-string args)))))
+        (error "Invalid arguments to choice: %s" args))))
 
 (defun org-if-reset-game (args)
   "Initialize game with ARGS."
   (if (null args)
       (clrhash org-if-current-env)
-      (error "Invalid reset arguments: " (prin1-to-string args))))
+      (error "Command reset takes no arguments")))
 
 (defun org-if-evlis (lst)
     "Evaluate every element of LST."
@@ -101,20 +101,20 @@
   (apply (org-if-getfunc func)
          (org-if-evlis   args)))
 
-(puthash '>     #'>                                 org-if-funcs)
-(puthash '<     #'<                                 org-if-funcs)
-(puthash '=     #'=                                 org-if-funcs)
-(puthash '+     #'+                                 org-if-funcs)
-(puthash '-     #'-                                 org-if-funcs)
-(puthash '*     #'*                                 org-if-funcs)
-(puthash '/     #'/                                 org-if-funcs)
-(puthash '>=    #'>=                                org-if-funcs)
-(puthash '<=    #'<=                                org-if-funcs)
-(puthash '!=    #'(lambda (x)
-                    (not (apply (org-if-getfunc '=)
-                                x)))                org-if-funcs)
-(puthash 'print #'org-if-insert-message             org-if-funcs)
-(puthash 'reset #'org-if-reset-game                 org-if-funcs)
+(puthash '>      #'>                                 org-if-funcs)
+(puthash '<      #'<                                 org-if-funcs)
+(puthash '=      #'=                                 org-if-funcs)
+(puthash '+      #'+                                 org-if-funcs)
+(puthash '-      #'-                                 org-if-funcs)
+(puthash '*      #'*                                 org-if-funcs)
+(puthash '/      #'/                                 org-if-funcs)
+(puthash '>=     #'>=                                org-if-funcs)
+(puthash '<=     #'<=                                org-if-funcs)
+(puthash '!=     #'(lambda (x)
+                     (not (apply (org-if-getfunc '=)
+                                 x)))                org-if-funcs)
+(puthash 'print  #'org-if-insert-message             org-if-funcs)
+(puthash 'reset  #'org-if-reset-game                 org-if-funcs)
 
 (defun org-if-eval (exp)
   "Evaluate expression EXP in `org-if-current-env'."
@@ -123,11 +123,11 @@
                                              org-if-current-env)))
                            (if (not (null val))
                                val
-                             (error (concat "Invalid symbol: " exp)))))
+                             (error "Invalid variable: %s" exp))))
    ((integerp exp)       (if (and (>= exp (expt -2 29))
                                   (<= exp (1- (expt 2 29))))
                              exp
-                             (error (concat "Integer out of range: " exp))))
+                             (error "Integer out of range: %s" exp)))
    ((atom    exp)        exp)
    ((and (consp exp)
          (eq (nth 0 exp)
@@ -139,7 +139,7 @@
          (eq (nth 0 exp)
              'choice))   (org-if-insert-choice  (cdr exp)))
    ((consp exp)          (org-if-apply (nth 0 exp) (nthcdr 1 exp)))
-   (t (error (concat "Invalid expression: " (prin1-to-string exp))))))
+   (t                    (error "Invalid expression: %s" exp))))
 
 (defun org-if-interpret (str)
   "Read & evaluate one or more S-Expressions from string STR."

@@ -60,8 +60,7 @@
                       (helper (nthcdr 2 vars)))))
     (if (evenp (length list))
         (helper list)
-      (error (concat "Invalid parameters passed to `org-if-set-env': "
-                     (prin1-to-string list))))))
+        (error "Invalid parameters passed to `org-if-set-env': %s" list))))
 
 (provide 'org-if-misc)
 ;;; org-if-misc.el ends here
