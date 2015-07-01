@@ -27,7 +27,9 @@
 
 ;;; Code:
 
+(require 'easymenu)
 (require 'generic-x)
+(require 'org)
 
 ;;;###autoload
 (define-generic-mode
@@ -39,6 +41,10 @@
   '("\\.org-if$") ; For testing purposes only
   nil
   "Major mode for ORG-IF programming language.")
+
+(easy-menu-define org-if-menu org-mode-map "Org IF menu"
+  '("Org-IF"
+    ["Active" toggle-org-if-active-mode :style toggle :selected org-if-active-mode]))
 
 (provide 'org-if-mode)
 ;;; org-if-mode.el ends here

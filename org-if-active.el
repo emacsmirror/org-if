@@ -106,5 +106,13 @@ they visit a new file."
     (interactive)
     (org-if-active-mode 0))
 
+;;;###autoload
+(defun toggle-org-if-active-mode ()
+    "Toggle `org-if-active-mode'."
+    (interactive)
+    (if org-if-active-mode
+        (deactivate-org-if)
+        (activate-org-if)))
+
 (provide 'org-if-active)
 ;;; org-if-active.el ends here
