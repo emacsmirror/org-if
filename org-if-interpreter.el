@@ -46,12 +46,12 @@
 
 (defun org-if-insert-message (args)
     "Insert message from ARGS into first major heading."
-    (if (and (eq (length args) 1) (stringp (car args)))
+    (if (stringp args)
       (save-excursion
         (org-if-goto-first-heading)
         (org-forward-heading-same-level 1)
         (open-line 1)
-        (insert (concat (car args) "\n")))
+        (insert (concat args "\n")))
       (error "Invalid arguments to print: %s" args)))
 
 (defun org-if-insert-choice (args)
@@ -139,7 +139,7 @@ ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 va
    ((and (consp exp)
          (eq (nth 0 exp)
              'choice))   (org-if-insert-choice  (cdr exp)))
-   ((consp exp)          (org-if-apply (nth 0 exp) (nthcdr 1 exp)))
+   ((consp exp)          (org-if-apply (nth 0 exp) (cdr exp)))
    (t                    (error "Invalid expression: %s" exp))))
 
 (defun org-if-interpret (str)
