@@ -59,8 +59,8 @@
 ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 val1 ...])."
   (let* ((link-path      (nth    0 args))
          (link-with-ext  (if (null (file-name-extension link-path))
-                              (concat link-path ".org")
-                              link-path))
+                             (concat link-path ".org")
+                             link-path))
          (link-full-path (expand-file-name (concat (file-name-directory buffer-file-name)
                                                    link-with-ext)))
          (link-desc      (nth    1 args))
@@ -83,10 +83,12 @@ ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 va
                             "]]\n"))))
         (error "Invalid arguments to choice: %s" args))))
 
-(defun org-if-reset-game (args)
-  "Initialize game; ARGS should be nil."
+(defun org-if-reset-env (args)
+  "Clear `org-if-current-env' and set `org-if-current-file' to nil; ARGS should be nil."
   (if (null args)
-      (clrhash org-if-current-env)
+      (progn
+        (clrhash org-if-current-env)
+        (setf    org-if-current-file nil))
       (error "Command reset takes no arguments")))
 
 (defun org-if-evlis (list)
@@ -115,7 +117,7 @@ ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 va
                      (not (apply (org-if-getfunc '=)
                                  x)))                org-if-funcs)
 (puthash 'print  #'org-if-insert-message             org-if-funcs)
-(puthash 'reset  #'org-if-reset-game                 org-if-funcs)
+(puthash 'reset  #'org-if-reset-env                  org-if-funcs)
 
 (defun org-if-eval (exp)
   "Evaluate expression EXP in `org-if-current-env'."

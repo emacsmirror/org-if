@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+(require 'cl)
+(require 'cl-macs)
 (require 'ob-core)
 (require 'org)
 (require 'org-if-misc)
@@ -33,11 +35,19 @@
 (require 'org-if-interpreter)
 (require 'outline)
 
+(defcustom org-if-save-dir "~/.org-if/"
+  "Directory where org-if saves data for current games in progress."
+  :group 'org-if
+  :type '(directory))
+
 (defvar org-if-old-load-languages
   nil
   "Container for value of `org-babel-load-languages'.")
 
-(defvar org-if-began nil "Whether or not org-if-active has just been enabled.")
+(defvar org-if-began nil "Whether or not `org-if-active-mode' has just been enabled.
+This variable lets `org-if-mode-hook' know whether or not to call `org-if-hide-code';
+that hook should only hide code when `org-if-active-mode' was enabled in an org buffer.
+Otherwise, the `org-follow-link-hook' should hide the code.")
 
 (defun org-if-hide-code ()
   "Hide all but the first two headings in org file."
@@ -57,7 +67,7 @@ they visit a new file."
                (get-file-buffer org-if-current-file))
       (kill-buffer (get-file-buffer org-if-current-file)))
     (setf org-if-current-file (file-truename buffer-file-name))
-    (setf org-if-old-env   org-if-current-env)
+    (setf org-if-old-env      (copy-hash-table org-if-current-env))
     (show-all)
     (org-babel-execute-buffer)
     (when org-if-began
@@ -85,7 +95,7 @@ they visit a new file."
         (org-if-org-mode-hook)))
     (progn
       (setf org-if-began nil)
-      (customize-set-variable 'org-confirm-babel-evaluate      t)
+      (customize-set-variable 'org-confirm-babel-evaluate t)
       (org-babel-do-load-languages
        'org-babel-load-languages
        org-if-old-load-languages)
@@ -113,6 +123,55 @@ they visit a new file."
     (if org-if-active-mode
         (deactivate-org-if)
         (activate-org-if)))
+
+;;;###autoload
+(defun org-if-save ()
+  "Save state of current org-if session in a file in `org-if-save-dir'."
+  (interactive)
+  (cl-labels ((parent-dir   (f)
+                            (file-name-nondirectory (directory-file-name (file-name-directory f))))
+              (write-string (str fname)
+                            (with-temp-buffer
+                              (insert str)
+                              (write-region (point-min)
+                                            (point-max)
+                                            fname
+                                            nil))))
+    (let* ((env-name  (parent-dir buffer-file-name))
+           (file-name (concat (file-name-as-directory org-if-save-dir)
+                              env-name))
+           (state     (list org-if-old-env
+                            org-if-current-file)))
+      (when (not (file-directory-p org-if-save-dir))
+        (make-directory org-if-save-dir))
+      (write-string   (prin1-to-string state) file-name))))
+
+;;;###autoload
+(defun org-if-restore (dir)
+  "Restore state of `org-if-current-env' and `org-if-current-file' for the appropriate DIR."
+  (interactive "DGame Directory: ")
+  (cl-labels ((read-from-file (path)
+                              (with-temp-buffer
+                                (insert-file-contents path)
+                                (car (read-from-string (buffer-string)))))
+              (dir-name (path)
+                        (file-name-nondirectory (directory-file-name path))))
+    (let* ((game-name (dir-name        dir))
+           (game-path (concat          (file-name-as-directory org-if-save-dir)
+                                       game-name))
+           (state     (read-from-file  game-path))
+           (env       (first           state))
+           (file      (second          state)))
+      (when (get-file-buffer file)
+        (kill-buffer file))
+      (when (not org-if-active-mode)
+        ; I switch to the scratch buffer to activate org-if-active-mode
+        ; because the current buffer may be an org buffer with org-if code
+        ; and I do not want to run it.
+        (switch-to-buffer (get-buffer-create "*scratch*"))
+        (activate-org-if))
+      (setf org-if-current-env env)
+      (find-file file))))
 
 (provide 'org-if-active)
 ;;; org-if-active.el ends here
