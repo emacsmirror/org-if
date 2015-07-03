@@ -47,6 +47,11 @@ a page was entered.")
   "Interactive Fiction Authoring System for Org-Mode."
   :group 'applications)
 
+(defcustom org-if-save-dir "~/.org-if/"
+  "Directory where org-if saves data for current games in progress."
+  :group 'org-if
+  :type '(directory))
+
 (defun org-if-goto-first-heading ()
   "Go to the line containing the first major heading in the current buffer.
 Major heading start with *."

@@ -35,19 +35,14 @@
 (require 'org-if-interpreter)
 (require 'outline)
 
-(defcustom org-if-save-dir "~/.org-if/"
-  "Directory where org-if saves data for current games in progress."
-  :group 'org-if
-  :type '(directory))
-
 (defvar org-if-old-load-languages
   nil
   "Container for value of `org-babel-load-languages'.")
 
-(defvar org-if-began nil "Whether or not `org-if-active-mode' has just been enabled.
-This variable lets `org-if-mode-hook' know whether or not to call `org-if-hide-code';
-that hook should only hide code when `org-if-active-mode' was enabled in an org buffer.
-Otherwise, the `org-follow-link-hook' should hide the code.")
+(defvar org-if-began nil "Whether `org-if-active-mode' has just been enabled.
+This variable lets `org-if-mode-hook' know if it should call `org-if-hide-code';
+that hook should only hide code when `org-if-active-mode' was enabled in an 
+org buffer.  Otherwise, the `org-follow-link-hook' should hide the code.")
 
 (defun org-if-hide-code ()
   "Hide all but the first two headings in org file."
@@ -63,6 +58,8 @@ they visit a new file."
 
 (defun org-if-org-mode-hook ()
     "This is the `org-mode-hook' run by `org-if-active-mode'."
+    ; First kill the previous buffer visited by org-if so it can be
+    ; re-evaluated if the user returns to it.
     (when (and org-if-current-file
                (get-file-buffer org-if-current-file))
       (kill-buffer (get-file-buffer org-if-current-file)))
@@ -70,6 +67,9 @@ they visit a new file."
     (setf org-if-old-env      (copy-hash-table org-if-current-env))
     (show-all)
     (org-babel-execute-buffer)
+    ; `org-if-hide-code' should usually be called from `org-follow-link-hook'.
+    ; However, if `org-if-active-mode' is enabled in an org buffer,
+    ; `org-if-hide-code' must be called manually.
     (when org-if-began
       (org-if-hide-code)
       (setf org-if-began nil))
@@ -91,6 +91,9 @@ they visit a new file."
        '((org-if . t)))
       (add-hook 'org-mode-hook 'org-if-org-mode-hook)
       (add-hook 'org-follow-link-hook 'org-if-hide-code)
+      ; Clear variables potentially left-over from previous sessions.
+      (clrhash org-if-current-env)
+      (setf org-if-current-file nil)
       (when (eq major-mode 'org-mode)
         (org-if-org-mode-hook)))
     (progn
@@ -125,11 +128,13 @@ they visit a new file."
         (activate-org-if)))
 
 ;;;###autoload
-(defun org-if-save ()
-  "Save state of current org-if session in a file in `org-if-save-dir'."
+(defun org-if-save-and-quit ()
+  "Save state of current org-if session in a file in `org-if-save-dir'.
+Then quit."
   (interactive)
   (cl-labels ((parent-dir   (f)
-                            (file-name-nondirectory (directory-file-name (file-name-directory f))))
+                            (file-name-nondirectory
+                             (directory-file-name (file-name-directory f))))
               (write-string (str fname)
                             (with-temp-buffer
                               (insert str)
@@ -144,19 +149,23 @@ they visit a new file."
                             org-if-current-file)))
       (when (not (file-directory-p org-if-save-dir))
         (make-directory org-if-save-dir))
-      (write-string   (prin1-to-string state) file-name))))
+      (write-string   (prin1-to-string state) file-name)
+      (deactivate-org-if)
+      (kill-buffer (current-buffer)))))
 
 ;;;###autoload
-(defun org-if-restore (dir)
-  "Restore state of `org-if-current-env' and `org-if-current-file' for the appropriate DIR."
-  (interactive "DGame Directory: ")
+(defun org-if-restore ()
+  "Restore state of `org-if-current-env' and `org-if-current-file' from save.
+Also load last visited file."
+  (interactive)
   (cl-labels ((read-from-file (path)
                               (with-temp-buffer
                                 (insert-file-contents path)
                                 (car (read-from-string (buffer-string)))))
-              (dir-name (path)
-                        (file-name-nondirectory (directory-file-name path))))
-    (let* ((game-name (dir-name        dir))
+              (parent-dir   (f)
+                            (file-name-nondirectory
+                             (directory-file-name (file-name-directory f)))))
+    (let* ((game-name (parent-dir      buffer-file-name))
            (game-path (concat          (file-name-as-directory org-if-save-dir)
                                        game-name))
            (state     (read-from-file  game-path))
@@ -164,12 +173,15 @@ they visit a new file."
            (file      (second          state)))
       (when (get-file-buffer file)
         (kill-buffer file))
-      (when (not org-if-active-mode)
-        ; I switch to the scratch buffer to activate org-if-active-mode
-        ; because the current buffer may be an org buffer with org-if code
-        ; and I do not want to run it.
-        (switch-to-buffer (get-buffer-create "*scratch*"))
-        (activate-org-if))
+      ; Since the user needs to load one file from the proper directory before
+      ; using Restore, this will prevent that file from appearing unevaluated.
+      (when (eq major-mode 'org-mode)
+        (kill-buffer (current-buffer)))
+      ; I switch to the scratch buffer to activate org-if-active-mode
+      ; because the current buffer may be an org buffer with org-if code
+      ; and I do not want to run it.
+      (switch-to-buffer (get-buffer-create "*scratch*"))
+      (activate-org-if)
       (setf org-if-current-env env)
       (find-file file))))
 

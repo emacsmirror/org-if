@@ -44,9 +44,9 @@
 
 (easy-menu-define org-if-menu org-mode-map "Org IF menu"
   '("Org-IF"
-    ["Active"  toggle-org-if-active-mode :style toggle :selected org-if-active-mode]
-    ["Save"    org-if-save               :active org-if-active-mode]
-    ["Restore" org-if-restore            :active (not org-if-active-mode)]))
+    ["Active"      toggle-org-if-active-mode :style toggle :selected org-if-active-mode]
+    ["Save & Quit" org-if-save-and-quit      :active org-if-active-mode]
+    ["Restore"     org-if-restore            :active (not org-if-active-mode)]))
 
 (provide 'org-if-mode)
 ;;; org-if-mode.el ends here
