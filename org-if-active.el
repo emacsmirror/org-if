@@ -35,10 +35,6 @@
 (require 'org-if-interpreter)
 (require 'outline)
 
-(defvar org-if-old-load-languages
-  nil
-  "Container for value of `org-babel-load-languages'.")
-
 (defvar org-if-began nil "Whether `org-if-active-mode' has just been enabled.
 This variable lets `org-if-mode-hook' know if it should call `org-if-hide-code';
 that hook should only hide code when `org-if-active-mode' was enabled in an 
@@ -91,17 +87,13 @@ they visit a new file."
        '((org-if . t)))
       (add-hook 'org-mode-hook 'org-if-org-mode-hook)
       (add-hook 'org-follow-link-hook 'org-if-hide-code)
-      ; Clear variables potentially left-over from previous sessions.
-      (clrhash org-if-current-env)
-      (setf org-if-current-file nil)
+      (org-if-reset-env nil)  ; Clear any data leftover from previous session
       (when (eq major-mode 'org-mode)
         (org-if-org-mode-hook)))
     (progn
       (setf org-if-began nil)
-      (customize-set-variable 'org-confirm-babel-evaluate t)
-      (org-babel-do-load-languages
-       'org-babel-load-languages
-       org-if-old-load-languages)
+      (custom-reevaluate-setting 'org-confirm-babel-evaluate)
+      (custom-reevaluate-setting 'org-babel-load-languages)
       (remove-hook 'org-mode-hook 'org-if-org-mode-hook)
       (remove-hook 'org-follow-link-hook 'org-if-hide-code)
       (when (eq major-mode 'org-mode)
