@@ -46,7 +46,7 @@
   '("Org-IF"
     ["Active"  toggle-org-if-active-mode :style toggle :selected org-if-active-mode]
     ["Save"    org-if-save               :active org-if-active-mode]
-    ["Restore" org-if-restore]))
+    ["Restore" org-if-restore            :active (not org-if-active-mode)]))
 
 (provide 'org-if-mode)
 ;;; org-if-mode.el ends here
