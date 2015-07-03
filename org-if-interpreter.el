@@ -83,14 +83,6 @@ ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 va
                             "]]\n"))))
         (error "Invalid arguments to choice: %s" args))))
 
-(defun org-if-reset-env (args)
-  "Clear `org-if-current-env' and set `org-if-current-file' to nil; ARGS should be nil."
-  (if (null args)
-      (progn
-        (clrhash org-if-current-env)
-        (setf    org-if-current-file nil))
-      (error "Command reset takes no arguments")))
-
 (defun org-if-evlis (list)
     "Evaluate every expression in LIST."
     (mapcar #'org-if-eval list))

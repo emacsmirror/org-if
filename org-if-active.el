@@ -87,7 +87,7 @@ they visit a new file."
        '((org-if . t)))
       (add-hook 'org-mode-hook 'org-if-org-mode-hook)
       (add-hook 'org-follow-link-hook 'org-if-hide-code)
-      (org-if-reset-env nil)  ; Clear any data leftover from previous session
+      (org-if-reset-env)  ; Clear any data leftover from previous session
       (when (eq major-mode 'org-mode)
         (org-if-org-mode-hook)))
     (progn
