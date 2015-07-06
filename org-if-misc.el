@@ -28,12 +28,17 @@
 (require 'cl)
 (require 'cl-macs)
 
+(defvar org-if-false nil "False value for org-if.")
+(defvar org-if-true  t   "Truth value for org-if.")
+
 (defvar org-if-current-file
   nil
   "This is the current file when `org-if-active-mode' is enabled.")
 
 (defvar org-if-current-env (make-hash-table)
   "Reference to org-if environment after code in current buffer has executed.")
+(puthash 'false 'org-if-false org-if-current-env)
+(puthash 'true  'org-if-true  org-if-current-env)
 
 (defvar org-if-old-env nil "Reference to org-if environment as it entered page.
 When saving is enabled, this environment will be the one saved.
@@ -48,12 +53,9 @@ a page was entered.")
   :group 'applications)
 
 (defcustom org-if-save-dir "~/.org-if/"
-  "Directory where org-if saves data for current games in progress."
+  "Directory where org-if saves data for sessions."
   :group 'org-if
   :type '(directory))
-
-(defvar org-if-false nil "False value for org-if.")
-(defvar org-if-true  t   "Truth value for org-if.")
 
 (defun org-if-set-env (list)
   "Set the new state of `org-if-current-env' with values from LIST.
@@ -62,7 +64,12 @@ LIST should be an even length list of the form (variable1 value1 ...)."
                     (when (not (null vars))
                       (let ((key (nth 0 vars))
                             (val (nth 1 vars)))
-                        (puthash key (org-if-eval val) org-if-current-env))
+                        (if (and (not (eq key 'true))
+                                 (not (eq key 'false)))
+                            (puthash key
+                                     (org-if-eval val)
+                                     org-if-current-env)
+                            (error "You cannot reassign false and true!")))
                       (helper (nthcdr 2 vars)))))
     (if (evenp (length list))
         (helper list)
@@ -70,8 +77,10 @@ LIST should be an even length list of the form (variable1 value1 ...)."
 
 (defun org-if-reset-env ()
   "Clear `org-if-current-env' and set `org-if-current-file' to nil."
+  (setf    org-if-current-file nil)
   (clrhash org-if-current-env)
-  (setf    org-if-current-file nil))
+  (puthash 'false 'false org-if-current-env)
+  (puthash 'true  'true  org-if-current-env))
 
 (defun org-if-goto-first-heading ()
   "Go to the line containing the first major heading in the current buffer.

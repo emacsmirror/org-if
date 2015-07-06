@@ -25,6 +25,7 @@
 
 ;;; Code:
 
+(require 'cl)
 (require 'org-if-misc)
 
 (defvar org-if-funcs (make-hash-table)
@@ -96,20 +97,57 @@ ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 va
   (apply (org-if-getfunc func)
          (org-if-evlis   args)))
 
-(puthash '>      #'>                                 org-if-funcs)
-(puthash '<      #'<                                 org-if-funcs)
-(puthash '=      #'=                                 org-if-funcs)
-(puthash '+      #'+                                 org-if-funcs)
-(puthash '-      #'-                                 org-if-funcs)
-(puthash '*      #'*                                 org-if-funcs)
-(puthash '/      #'/                                 org-if-funcs)
-(puthash '>=     #'>=                                org-if-funcs)
-(puthash '<=     #'<=                                org-if-funcs)
-(puthash '!=     #'(lambda (x)
-                     (not (apply (org-if-getfunc '=)
-                                 x)))                org-if-funcs)
-(puthash 'print  #'org-if-insert-message             org-if-funcs)
-(puthash 'reset  #'org-if-reset-env                  org-if-funcs)
+(defmacro org-if-add-func (sym func argtest boolp)
+  "Add SYM to `org-if-funcs' with primitive function FUNC.
+ARGTEST is the test to apply to each function argument.
+BOOLP determines whether we should convert nil or non-nil
+results into false and true symbols."
+  (let ((args (gensym))
+        (res  (gensym)))
+    `(puthash ',sym
+              #'(lambda (&rest ,args)
+                  (if (member nil
+                              (mapcar #',argtest
+                                      ,args))
+                      (error "Invalid argument(s) to %s: %s" ',sym ,args)
+                    ;(apply #',func ,args)
+                      (let ((,res (apply #',func ,args)))
+                        ,(if boolp
+                             `(if (null ,res)
+                                  'false
+                                'true)
+                             res))))
+              org-if-funcs)))
+
+(org-if-add-func +      +      numberp nil)
+(org-if-add-func -      -      numberp nil)
+(org-if-add-func *      *      numberp nil)
+(org-if-add-func /      /      numberp nil)
+(org-if-add-func >      >      numberp t)
+(org-if-add-func <      <      numberp t)
+(org-if-add-func >=     >=     numberp t)
+(org-if-add-func <=     <=     numberp t)
+(org-if-add-func <=     <=     numberp t)
+(org-if-add-func =
+                 (lambda (&rest args)
+                   (cond ((numberp (first args))
+                          (apply #'= args))
+                         ((stringp (first args))
+                          (apply #'string-equal args))))
+                 (lambda (x)
+                   (or (numberp x) (stringp x)))
+                 t)
+(org-if-add-func !=
+                 (lambda (&rest args)
+                   (not (cond ((numberp (first args))
+                               (apply #'= args))
+                              ((stringp (first args))
+                               (apply #'string-equal args)))))
+                 (lambda (x)
+                   (or (numberp x) (stringp x)))
+                 t)
+(org-if-add-func print org-if-insert-message stringp nil)
+(puthash 'reset #'org-if-reset-env org-if-funcs)
 
 (defun org-if-eval (exp)
   "Evaluate expression EXP in `org-if-current-env'."
