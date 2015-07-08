@@ -102,21 +102,20 @@ ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 va
 ARGTEST is the test to apply to each function argument.
 BOOLP determines whether we should convert nil or non-nil
 results into false and true symbols."
-  (let ((args (gensym))
-        (res  (gensym)))
+  (let ((args     (gensym))
+        (results  (gensym)))
     `(puthash ',sym
               #'(lambda (&rest ,args)
                   (if (member nil
                               (mapcar #',argtest
                                       ,args))
                       (error "Invalid argument(s) to %s: %s" ',sym ,args)
-                    ;(apply #',func ,args)
-                      (let ((,res (apply #',func ,args)))
+                      (let ((,results (apply #',func ,args)))
                         ,(if boolp
-                             `(if (null ,res)
+                             `(if (null ,results)
                                   'false
-                                'true)
-                             res))))
+                                  'true)
+                             results))))
               org-if-funcs)))
 
 (org-if-add-func +      +      numberp nil)
@@ -133,18 +132,26 @@ results into false and true symbols."
                    (cond ((numberp (first args))
                           (apply #'= args))
                          ((stringp (first args))
-                          (apply #'string-equal args))))
+                          (apply #'string-equal args))
+                         ((or (eq (first args) 'true)
+                              (eq (first args) 'false))
+                          (apply #'eq args))))
                  (lambda (x)
-                   (or (numberp x) (stringp x)))
+                   (or (numberp x)  (stringp x)
+                       (eq x 'true) (eq x 'false)))
                  t)
 (org-if-add-func !=
                  (lambda (&rest args)
                    (not (cond ((numberp (first args))
                                (apply #'= args))
                               ((stringp (first args))
-                               (apply #'string-equal args)))))
+                               (apply #'string-equal args))
+                              ((or (eq (first args) 'true)
+                                   (eq (first args) 'false))
+                               (apply #'eq args)))))
                  (lambda (x)
-                   (or (numberp x) (stringp x)))
+                   (or (numberp x)  (stringp x)
+                       (eq x 'true) (eq x 'false)))
                  t)
 (org-if-add-func print org-if-insert-message stringp nil)
 (puthash 'reset #'org-if-reset-env org-if-funcs)
@@ -156,7 +163,7 @@ results into false and true symbols."
                                              org-if-current-env)))
                            (if (not (null val))
                                val
-                             (error "Invalid variable: %s" exp))))
+                               (error "Invalid variable: %s" exp))))
    ((integerp exp)       (if (and (>= exp (expt -2 29))
                                   (<= exp (1- (expt 2 29))))
                              exp
