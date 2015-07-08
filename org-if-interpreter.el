@@ -153,6 +153,30 @@ results into false and true symbols."
                    (or (numberp x)  (stringp x)
                        (eq x 'true) (eq x 'false)))
                  t)
+(org-if-add-func and
+                 (lambda (&rest args)
+                   (if (member 'false args)
+                       'false
+                       'true))
+                 (lambda (x)
+                   (or (eq x 'true) (eq x 'false)))
+                 nil)
+(org-if-add-func or
+                 (lambda (&rest args)
+                   (if (member 'true args)
+                       'true
+                       'false))
+                 (lambda (x)
+                   (or (eq x 'true) (eq x 'false)))
+                 nil)
+(org-if-add-func not
+                 (lambda (arg)
+                   (if (eq arg 'false)
+                       'true
+                       'false))
+                 (lambda (x)
+                   (or (eq x 'true) (eq x 'false)))
+                 nil)
 (org-if-add-func print org-if-insert-message stringp nil)
 (puthash 'reset #'org-if-reset-env org-if-funcs)
 

@@ -28,17 +28,14 @@
 (require 'cl)
 (require 'cl-macs)
 
-(defvar org-if-false nil "False value for org-if.")
-(defvar org-if-true  t   "Truth value for org-if.")
-
 (defvar org-if-current-file
   nil
   "This is the current file when `org-if-active-mode' is enabled.")
 
 (defvar org-if-current-env (make-hash-table)
   "Reference to org-if environment after code in current buffer has executed.")
-(puthash 'false 'org-if-false org-if-current-env)
-(puthash 'true  'org-if-true  org-if-current-env)
+(puthash 'true  'true  org-if-current-env)
+(puthash 'false 'false org-if-current-env)
 
 (defvar org-if-old-env nil "Reference to org-if environment as it entered page.
 When saving is enabled, this environment will be the one saved.
