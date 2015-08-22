@@ -61,7 +61,7 @@ they visit a new file."
       (kill-buffer (get-file-buffer org-if-current-file)))
     (setf org-if-current-file (file-truename buffer-file-name))
     (setf org-if-old-env      (copy-hash-table org-if-current-env))
-    (show-all)
+    (outline-show-all)
     (org-babel-execute-buffer)
     ; `org-if-hide-code' should usually be called from `org-follow-link-hook'.
     ; However, if `org-if-active-mode' is enabled in an org buffer,
