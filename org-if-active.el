@@ -34,7 +34,7 @@
 
 (defvar org-if-began nil "Whether `org-if-active-mode' has just been enabled.
 This variable lets `org-if-mode-hook' know if it should call `org-if-hide-code';
-that hook should only hide code when `org-if-active-mode' was enabled in an 
+that hook should only hide code when `org-if-active-mode' was enabled in an
 org buffer.  Otherwise, the `org-follow-link-hook' should hide the code.")
 
 (defun org-if-hide-code ()
@@ -53,11 +53,11 @@ they visit a new file."
     "This is the `org-mode-hook' run by `org-if-active-mode'."
     ; First kill the previous buffer visited by org-if so it can be
     ; re-evaluated if the user returns to it.
-    (when (and org-if-current-file
-               (get-file-buffer org-if-current-file))
-      (kill-buffer (get-file-buffer org-if-current-file)))
-    (setf org-if-current-file (file-truename buffer-file-name))
-    (setf org-if-old-env      (copy-hash-table org-if-current-env))
+    (when (and *org-if-current-file*
+               (get-file-buffer *org-if-current-file*))
+      (kill-buffer (get-file-buffer *org-if-current-file*)))
+    (setf *org-if-current-file* (file-truename buffer-file-name))
+    (setf *org-if-old-env*      (copy-hash-table *org-if-current-env*))
     (outline-show-all)
     (org-babel-execute-buffer)
     ; `org-if-hide-code' should usually be called from `org-follow-link-hook'.
@@ -134,8 +134,8 @@ Then quit."
     (let* ((env-name  (parent-dir buffer-file-name))
            (file-name (concat (file-name-as-directory org-if-save-dir)
                               env-name))
-           (state     (list org-if-old-env
-                            org-if-current-file)))
+           (state     (list *org-if-old-env*
+                            *org-if-current-file*)))
       (when (not (file-directory-p org-if-save-dir))
         (make-directory org-if-save-dir))
       (write-string   (prin1-to-string state) file-name)
@@ -144,7 +144,7 @@ Then quit."
 
 ;;;###autoload
 (defun org-if-restore ()
-  "Restore state of `org-if-current-env' and `org-if-current-file' from save.
+  "Restore state of `*org-if-current-env*' and `*org-if-current-file*' from save.
 Also load last visited file."
   (interactive)
   (cl-labels ((read-from-file (path)
@@ -171,7 +171,7 @@ Also load last visited file."
       ; and I do not want to run it.
       (switch-to-buffer (get-buffer-create "*scratch*"))
       (activate-org-if)
-      (setf org-if-current-env env)
+      (setf *org-if-current-env* env)
       (find-file file))))
 
 (provide 'org-if-active)

@@ -30,7 +30,7 @@
 (require 'org-if-misc)
 (require 'org-if-reader)
 
-(defvar org-if-funcs (make-hash-table)
+(defvar *org-if-funcs* (make-hash-table)
   "Listing of all the functions supplied by org-if.")
 
 (defun org-if-conditional (args)
@@ -91,8 +91,8 @@ ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 va
     (mapcar #'org-if-eval list))
 
 (defun org-if-getfunc (func)
-    "Retrieve the function FUNC from `org-if-funcs'."
-    (gethash func org-if-funcs))
+    "Retrieve the function FUNC from `*org-if-funcs*'."
+    (gethash func *org-if-funcs*))
 
 (defun org-if-apply (func args)
   "Call function FUNC with arguments ARGS."
@@ -100,7 +100,7 @@ ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 va
          (org-if-evlis   args)))
 
 (defmacro org-if-add-func (sym func argtest boolp)
-  "Add SYM to `org-if-funcs' with primitive function FUNC.
+  "Add SYM to `*org-if-funcs*' with primitive function FUNC.
 ARGTEST is the test to apply to each function argument.
 BOOLP determines whether we should convert nil or non-nil
 results into false and true symbols."
@@ -118,7 +118,7 @@ results into false and true symbols."
                                   'false
                                   'true)
                              results))))
-              org-if-funcs)))
+              *org-if-funcs*)))
 
 (org-if-add-func +      +      numberp nil)
 (org-if-add-func -      -      numberp nil)
@@ -180,13 +180,13 @@ results into false and true symbols."
                    (or (eq x 'true) (eq x 'false)))
                  nil)
 (org-if-add-func print org-if-insert-message stringp nil)
-(puthash 'reset #'org-if-reset-env org-if-funcs)
+(puthash 'reset #'org-if-reset-env *org-if-funcs*)
 
 (defun org-if-eval (exp)
-  "Evaluate expression EXP in `org-if-current-env'."
+  "Evaluate expression EXP in `*org-if-current-env*'."
   (cond
    ((symbolp exp)        (let ((val (gethash exp
-                                             org-if-current-env)))
+                                             *org-if-current-env*)))
                            (if (not (null val))
                                val
                                (error "Invalid variable: %s" exp))))

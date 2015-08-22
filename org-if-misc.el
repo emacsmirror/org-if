@@ -28,21 +28,25 @@
 (require 'cl-lib)
 (require 'cl-macs)
 
-(defvar org-if-current-file
+(defvar *org-if-current-file*
   nil
   "This is the current file when `org-if-active-mode' is enabled.")
 
-(defvar org-if-current-env (make-hash-table)
+(defvar *org-if-current-env*
+  (make-hash-table)
   "Reference to org-if environment after code in current buffer has executed.")
-(puthash 'true  'true  org-if-current-env)
-(puthash 'false 'false org-if-current-env)
+; Add boolean values to empty environment
+(puthash 'true  'true  *org-if-current-env*)
+(puthash 'false 'false *org-if-current-env*)
 
-(defvar org-if-old-env nil "Reference to org-if environment as it entered page.
+(defvar *org-if-old-env*
+  nil
+  "Reference to org-if environment as it entered page.
 When saving is enabled, this environment will be the one saved.
 If the user saves on a page that modifies the environment,
 then when the user restores that same code will run twice.
-Therefore, we keep a copy of the environment as it was when
-a page was entered.")
+Therefore, we save a copy of the environment as it was when
+the user loaded the current page.")
 
 (defgroup org-if
   nil
@@ -55,7 +59,7 @@ a page was entered.")
   :type '(directory))
 
 (defun org-if-set-env (list)
-  "Set the new state of `org-if-current-env' with values from LIST.
+  "Set the new state of `*org-if-current-env*' with values from LIST.
 LIST should be an even length list of the form (variable1 value1 ...)."
   (cl-labels ((helper (vars)
                     (when (not (null vars))
@@ -65,7 +69,7 @@ LIST should be an even length list of the form (variable1 value1 ...)."
                                  (not (eq key 'false)))
                             (puthash key
                                      (org-if-eval val)
-                                     org-if-current-env)
+                                     *org-if-current-env*)
                             (error "You cannot reassign false and true!")))
                       (helper (nthcdr 2 vars)))))
     (if (cl-evenp (length list))
@@ -73,11 +77,11 @@ LIST should be an even length list of the form (variable1 value1 ...)."
         (error "Invalid parameters passed to `org-if-set-env': %s" list))))
 
 (defun org-if-reset-env ()
-  "Clear `org-if-current-env' and set `org-if-current-file' to nil."
-  (setf    org-if-current-file nil)
-  (clrhash org-if-current-env)
-  (puthash 'false 'false org-if-current-env)
-  (puthash 'true  'true  org-if-current-env))
+  "Clear `*org-if-current-env*' and set `*org-if-current-file*' to nil."
+  (setf    *org-if-current-file* nil)
+  (clrhash *org-if-current-env*)
+  (puthash 'false 'false *org-if-current-env*)
+  (puthash 'true  'true  *org-if-current-env*))
 
 (defun org-if-goto-first-heading ()
   "Go to the line containing the first major heading in the current buffer.
