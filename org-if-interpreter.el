@@ -66,7 +66,7 @@ ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 va
                                                    link-with-ext)))
          (link-desc      (nth    1 args))
          (link-state     (nthcdr 2 args)))
-    (if (and (>= (length args) 2)  (zerop   (% (length args) 2))
+    (if (and (>= (length args) 2)  (evenp (length args))
              (stringp link-path)   (stringp link-desc)
              (or (consp link-state) (null link-state)))
         (progn
