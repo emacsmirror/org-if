@@ -28,6 +28,7 @@
 (require 'cl-macs)
 (require 'cl-lib)
 (require 'org-if-misc)
+(require 'org-if-reader)
 
 (defvar org-if-funcs (make-hash-table)
   "Listing of all the functions supplied by org-if.")
@@ -208,12 +209,13 @@ results into false and true symbols."
 
 (defun org-if-interpret (str)
   "Read & evaluate one or more S-Expressions from string STR."
-  (let ((pos 0))
-    (while (< pos (length str))
-      (let* ((res (read-from-string str pos))
+  (let ((st str))
+    (while (not (string-blank-p st))
+      (let* ((res (org-if-read st))
              (exp (car res)))
-        (setq pos (cdr res))
-        (print (org-if-eval exp))))))
+        (setq st (cdr res))
+        (when (not (eq exp *org-if-null-token*))
+          (print (org-if-eval exp)))))))
 
 (provide 'org-if-interpreter)
 ;;; org-if-interpreter ends here
