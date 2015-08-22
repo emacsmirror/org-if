@@ -39,7 +39,7 @@
                         (when (not (null as))
                               (if (= (length as) 1)
                                   (org-if-eval (nth 0 as))
-                                  (if (org-if-eval (nth 0 as))
+                                  (if (eq 'true (org-if-eval (nth 0 as)))
                                       (org-if-eval (nth 1 as))
                                       (helper (nthcdr 2 as)))))))
       (if (>= (length args) 2)
