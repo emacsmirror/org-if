@@ -3,7 +3,6 @@
 ;; Copyright © 2015 Philip Woods
 
 ;; Author: Philip Woods <elzairthesorcerer@gmail.com>
-;; Keywords: if, org-if, org org-mode
 
 ;; This file is not part of GNU Emacs.
 
@@ -26,8 +25,6 @@
 
 ;;; Code:
 
-(require 'cl)
-(require 'cl-macs)
 (require 'ob-core)
 (require 'org)
 (require 'org-if-misc)

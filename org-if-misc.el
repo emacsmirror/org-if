@@ -25,7 +25,7 @@
 
 ;;; Code:
 
-(require 'cl)
+(require 'cl-lib)
 (require 'cl-macs)
 
 (defvar org-if-current-file
@@ -68,7 +68,7 @@ LIST should be an even length list of the form (variable1 value1 ...)."
                                      org-if-current-env)
                             (error "You cannot reassign false and true!")))
                       (helper (nthcdr 2 vars)))))
-    (if (evenp (length list))
+    (if (cl-evenp (length list))
         (helper list)
         (error "Invalid parameters passed to `org-if-set-env': %s" list))))
 

@@ -25,7 +25,8 @@
 
 ;;; Code:
 
-(require 'cl)
+(require 'cl-macs)
+(require 'cl-lib)
 (require 'org-if-misc)
 
 (defvar org-if-funcs (make-hash-table)
@@ -66,7 +67,7 @@ ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 va
                                                    link-with-ext)))
          (link-desc      (nth    1 args))
          (link-state     (nthcdr 2 args)))
-    (if (and (>= (length args) 2)  (evenp (length args))
+    (if (and (>= (length args) 2)  (cl-evenp (length args))
              (stringp link-path)   (stringp link-desc)
              (or (consp link-state) (null link-state)))
         (progn
@@ -102,8 +103,8 @@ ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 va
 ARGTEST is the test to apply to each function argument.
 BOOLP determines whether we should convert nil or non-nil
 results into false and true symbols."
-  (let ((args     (gensym))
-        (results  (gensym)))
+  (let ((args     (cl-gensym))
+        (results  (cl-gensym)))
     `(puthash ',sym
               #'(lambda (&rest ,args)
                   (if (member nil
