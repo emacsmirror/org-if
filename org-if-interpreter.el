@@ -29,6 +29,7 @@
 (require 'cl-lib)
 (require 'org-if-misc)
 (require 'org-if-reader)
+(require 'subr-x)
 
 (defvar *org-if-funcs* (make-hash-table)
   "Listing of all the functions supplied by org-if.")
