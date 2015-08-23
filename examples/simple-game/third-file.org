@@ -1,0 +1,16 @@
+* Empty Inventory
+
+  This is the third page.
+
+* Choices
+  
+[[file:third-file.org][Go forward]]
+
+* Code
+
+#+begin_src org-if :results nil
+(set inventory "Empty")
+(set goal "Reached")
+(print "This is even more of the third page.")
+(choice "second-file" "Go back and get stuff" inventory "Half-Full")
+#+end_src

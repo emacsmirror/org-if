@@ -1,0 +1,15 @@
+* Beginning
+  
+  This is some text.
+
+* Choices
+
+[[file:second-file.org][Tests]]
+
+* Code
+
+#+begin_src org-if :results nil
+(set goal "Not Reached")
+(print "Hello World! This is an org-interp test")
+(choice "second-file" "More tests" inventory "Almost Empty")
+#+end_src
