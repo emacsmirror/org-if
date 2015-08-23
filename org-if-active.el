@@ -158,8 +158,8 @@ Also load last visited file."
            (game-path (concat          (file-name-as-directory org-if-save-dir)
                                        game-name))
            (state     (read-from-file  game-path))
-           (env       (first           state))
-           (file      (second          state)))
+           (env       (nth             0 state))
+           (file      (nth             1 state)))
       (when (get-file-buffer file)
         (kill-buffer file))
       ; Since the user needs to load one file from the proper directory before
