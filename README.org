@@ -24,9 +24,9 @@ Install the [[https://git-scm.com/][git version control system]] if you do not a
     
 1. Open the *Terminal* application and run the following command.
 
-#+begin_src sh
-sudo apt-get install git
-#+end_src
+   #+begin_src sh
+   sudo apt-get install git
+   #+end_src
 
 2. That's all s/he wrote!
    
@@ -62,9 +62,9 @@ If you do not already have a recent version of *Emacs* (i.e. 24.5 or later), ins
      
 1. Open the *Terminal* application and run the following command.
 
-#+begin_src sh
-sudo apt-get install emacs
-#+end_src
+   #+begin_src sh
+   sudo apt-get install emacs
+   #+end_src
 
 2. You have installed *Emacs* on Linux with a single command! Aren't you swell?
 
@@ -88,9 +88,9 @@ Currently, no package repositories carry *org-if*. With hope that will soon chan
      
 2. Type the following commands into the console.
 
-#+begin_src sh
-git clone https://gitlab.com/elzair/org-if.git ~/org-if
-#+end_src
+   #+begin_src sh
+   git clone https://gitlab.com/elzair/org-if.git ~/org-if
+   #+end_src
 
 3. Open *Emacs*
 
@@ -102,24 +102,24 @@ git clone https://gitlab.com/elzair/org-if.git ~/org-if
    
    *NOTE:* You can paste text into Emacs either by selecting /Edit->Paste/ in the top menu.
 
-#+begin_src elisp
-(defvar scripts-dir (expand-file-name "pkg-devel-scripts" "~"))
-(make-directory scripts-dir t)
-(defvar pkg-devel (expand-file-name "pkg-devel.el" scripts-dir))
-(url-copy-file "https://gitlab.com/snippets/7736/raw" pkg-devel)
-(load pkg-devel)
-(defvar org-if-code (file-name-as-directory (expand-file-name "org-if" "~")))
-(package-initialize)
-(pkg-devel-refresh org-if-code)
-(find-file user-init-file)
-#+end_src
+   #+begin_src elisp
+   (defvar scripts-dir (expand-file-name "pkg-devel-scripts" "~"))
+   (make-directory scripts-dir t)
+   (defvar pkg-devel (expand-file-name "pkg-devel.el" scripts-dir))
+   (url-copy-file "https://gitlab.com/snippets/7736/raw" pkg-devel)
+   (load pkg-devel)
+   (defvar org-if-code (file-name-as-directory (expand-file-name "org-if" "~")))
+   (package-initialize)
+   (pkg-devel-refresh org-if-code)
+   (find-file user-init-file)
+   #+end_src
 
 7. Paste the following text into the file that just opened.
 
-#+begin_src elisp
-(package-initialize)
-(require 'org-if)
-#+end_src
+   #+begin_src elisp
+   (package-initialize)
+   (require 'org-if)
+   #+end_src
 
 8. Click on =File->Save= in the top menu to save the file.
    
