@@ -1,5 +1,5 @@
 (define-package
   "org-if"
-  "0.1.0"
+  "0.1.1"
   "Interactive Fiction Authoring System for Org-Mode."
-  '((org "8.2.10")))
+  '())
