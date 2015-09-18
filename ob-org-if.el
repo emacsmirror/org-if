@@ -34,7 +34,9 @@
 (require 'org-if-mode)
 
 ;; optionally declare default header arguments for this language
-(defvar org-babel-default-header-args:org-if '())
+(defvar org-babel-default-header-args:org-if
+  '((:results . "no"))
+  "Default header arguments for org-if SRC blocks.")
 
 ;; This is the main function which is called to evaluate a code
 ;; block.

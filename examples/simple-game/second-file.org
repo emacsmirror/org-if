@@ -8,7 +8,7 @@
 
 * Code
 
-#+begin_src org-if :results nil
+#+begin_src org-if
 (set inventory "Full")
 (print "This is some more text.")
 (choice "third-file" "Go forward with half of stuff" inventory "Half-Full")
