@@ -1,10 +1,5 @@
-* Test2
 
   This is more text.
-
-* Choices
-  
-[[file:third-file.org][Go forward]]
 
 * Code
 

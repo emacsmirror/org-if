@@ -1,10 +1,5 @@
-* Empty Inventory
 
   This is the third page.
-
-* Choices
-  
-[[file:third-file.org][Go forward]]
 
 * Code
 

@@ -52,8 +52,7 @@
     "Insert message from ARGS into first major heading."
     (if (stringp args)
       (save-excursion
-        (org-if-goto-first-heading)
-        (org-forward-heading-same-level 1)
+        (goto-char (org-find-exact-headline-in-buffer "Choices"))
         (open-line 1)
         (insert (concat args "\n")))
       (error "Invalid arguments to print: %s" args)))
@@ -74,8 +73,7 @@ ARGS should be of the form (\"file-path-string\" \"choice description\" [var1 va
              (or (consp link-state) (null link-state)))
         (progn
           (save-excursion
-            (org-if-goto-first-heading)
-            (org-forward-heading-same-level 2)
+            (goto-char (org-find-exact-headline-in-buffer "Code"))
             (open-line 1)
             (insert (concat "[[if:"
                             link-full-path

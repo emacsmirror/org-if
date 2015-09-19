@@ -33,10 +33,17 @@
 (require 'outline)
 
 (defun org-if-hide-code ()
-  "Hide all but the first two headings in org file."
-  (org-if-goto-first-heading)
-  (org-forward-heading-same-level 2)
-  (narrow-to-region (point-min) (point)))
+  "Hide the CODE section of an org-if file."
+  (save-excursion
+    (goto-char (org-find-exact-headline-in-buffer "Code"))
+    (narrow-to-region (point-min) (point))))
+
+(defun org-if-add-choices-heading ()
+    "Add CHOICES section to org-if file."
+    (save-excursion
+      (goto-char (org-find-exact-headline-in-buffer "Code"))
+      (open-line 1)
+      (insert "* Choices\n\n")))
 
 (defun org-if-confirm-babel-evaluate (lang body)
     "Replacement for `org-confirm-babel-evaluate' when mode is on.
@@ -54,8 +61,10 @@ they visit a new file."
     (setf *org-if-current-file* (file-truename buffer-file-name))
     (setf *org-if-old-env*      (copy-hash-table *org-if-current-env*))
     (outline-show-all)
+    (org-if-add-choices-heading)
     (org-babel-execute-buffer)
-    (set-buffer-modified-p nil))
+    (set-buffer-modified-p nil)
+    (org-if-hide-code))
 
 ;;;###autoload
 (define-minor-mode org-if-active-mode
@@ -71,13 +80,13 @@ they visit a new file."
          'org-babel-load-languages
          '((org-if . t)))
         (add-hook 'org-mode-hook 'org-if-org-mode-hook)
-        (add-hook 'org-follow-link-hook 'org-if-hide-code)
+        ;(add-hook 'org-follow-link-hook 'org-if-hide-code)
         (org-if-reset-env)); Clear any data leftover from previous session
     (progn
       (custom-reevaluate-setting 'org-confirm-babel-evaluate)
       (custom-reevaluate-setting 'org-babel-load-languages)
       (remove-hook 'org-mode-hook 'org-if-org-mode-hook)
-      (remove-hook 'org-follow-link-hook 'org-if-hide-code)
+      ;(remove-hook 'org-follow-link-hook 'org-if-hide-code)
       (kill-buffer *org-if-current-file*) ; Kill last buffer visited by org-if.
       (setf *org-if-current-file* nil)
       (org-if-reset-env))))

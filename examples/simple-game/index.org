@@ -1,10 +1,5 @@
-* Beginning
   
   This is some text.
-
-* Choices
-
-[[file:second-file.org][Tests]]
 
 * Code
 
