@@ -31,7 +31,7 @@
 
 (defun org-if-open (link)
     "Open the org-if file and set the variables specified by LINK.
-LINK should be in the form if:file/path.org(var val ...)."
+LINK should be in the form if:file/path.org(var1 val1 ...)."
   (let* ((sexp-begin (string-match "(" link))
          (file       (substring link 0 sexp-begin))
          (sexp       (substring link sexp-begin))

@@ -32,11 +32,6 @@
 (require 'org-if-interpreter)
 (require 'outline)
 
-(defvar org-if-began nil "Whether `org-if-active-mode' has just been enabled.
-This variable lets `org-if-mode-hook' know if it should call `org-if-hide-code';
-that hook should only hide code when `org-if-active-mode' was enabled in an
-org buffer.  Otherwise, the `org-follow-link-hook' should hide the code.")
-
 (defun org-if-hide-code ()
   "Hide all but the first two headings in org file."
   (org-if-goto-first-heading)
@@ -60,12 +55,6 @@ they visit a new file."
     (setf *org-if-old-env*      (copy-hash-table *org-if-current-env*))
     (outline-show-all)
     (org-babel-execute-buffer)
-    ; `org-if-hide-code' should usually be called from `org-follow-link-hook'.
-    ; However, if `org-if-active-mode' is enabled in an org buffer,
-    ; `org-if-hide-code' must be called manually.
-    (when org-if-began
-      (org-if-hide-code)
-      (setf org-if-began nil))
     (set-buffer-modified-p nil))
 
 ;;;###autoload
@@ -75,32 +64,40 @@ they visit a new file."
   :lighter    " Org-IF Active"
   :global     t
   (if org-if-active-mode
+      (progn
+        (customize-set-variable 'org-confirm-babel-evaluate
+                                (function org-if-confirm-babel-evaluate))
+        (org-babel-do-load-languages
+         'org-babel-load-languages
+         '((org-if . t)))
+        (add-hook 'org-mode-hook 'org-if-org-mode-hook)
+        (add-hook 'org-follow-link-hook 'org-if-hide-code)
+        (org-if-reset-env)); Clear any data leftover from previous session
     (progn
-      (setf org-if-began t)
-      (customize-set-variable 'org-confirm-babel-evaluate
-                              (function org-if-confirm-babel-evaluate))
-      (org-babel-do-load-languages
-       'org-babel-load-languages
-       '((org-if . t)))
-      (add-hook 'org-mode-hook 'org-if-org-mode-hook)
-      (add-hook 'org-follow-link-hook 'org-if-hide-code)
-      (org-if-reset-env)  ; Clear any data leftover from previous session
-      (when (eq major-mode 'org-mode)
-        (org-if-org-mode-hook)))
-    (progn
-      (setf org-if-began nil)
       (custom-reevaluate-setting 'org-confirm-babel-evaluate)
       (custom-reevaluate-setting 'org-babel-load-languages)
       (remove-hook 'org-mode-hook 'org-if-org-mode-hook)
       (remove-hook 'org-follow-link-hook 'org-if-hide-code)
-      (when (eq major-mode 'org-mode)
-        (widen)))))
+      (kill-buffer *org-if-current-file*) ; Kill last buffer visited by org-if.
+      (setf *org-if-current-file* nil)
+      (org-if-reset-env))))
 
 ;;;###autoload
-(defun activate-org-if ()
-    "Activate org-if-active minor-mode."
+(defun activate-org-if (&optional no-navigate-p)
+    "Activate org-if-active minor-mode.
+When NO-NAVIGATE-P is specified, do not go to file \"index.org\" in current directory."
     (interactive)
-    (org-if-active-mode 1))
+    ; Since the user needs to be in the current directory to activate org-if,
+    ; any org-mode buffer must be closed so org-if can properly evaluate it.
+    (let* ((curdir    (file-name-directory buffer-file-truename))
+           (startfile (concat curdir "index.org")))
+     (message curdir) 
+     (message startfile) 
+     (when (eq major-mode 'org-mode)
+       (kill-buffer (current-buffer)))
+     (org-if-active-mode 1)
+     (when (null no-navigate-p)
+       (find-file startfile))))
 
 ;;;###autoload
 (defun deactivate-org-if ()
@@ -139,13 +136,12 @@ Then quit."
       (when (not (file-directory-p org-if-save-dir))
         (make-directory org-if-save-dir))
       (write-string   (prin1-to-string state) file-name)
-      (deactivate-org-if)
-      (kill-buffer (current-buffer)))))
+      (deactivate-org-if))))
 
 ;;;###autoload
 (defun org-if-restore ()
   "Restore state of `*org-if-current-env*' and `*org-if-current-file*' from save.
-Also load last visited file."
+Also restore last visited file."
   (interactive)
   (cl-labels ((read-from-file (path)
                               (with-temp-buffer
@@ -162,15 +158,7 @@ Also load last visited file."
            (file      (nth             1 state)))
       (when (get-file-buffer file)
         (kill-buffer file))
-      ; Since the user needs to load one file from the proper directory before
-      ; using Restore, this will prevent that file from appearing unevaluated.
-      (when (eq major-mode 'org-mode)
-        (kill-buffer (current-buffer)))
-      ; I switch to the scratch buffer to activate org-if-active-mode
-      ; because the current buffer may be an org buffer with org-if code
-      ; and I do not want to run it.
-      (switch-to-buffer (get-buffer-create "*scratch*"))
-      (activate-org-if)
+      (activate-org-if t)
       (setf *org-if-current-env* env)
       (find-file file))))
 

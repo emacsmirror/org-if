@@ -85,7 +85,7 @@ LIST should be an even length list of the form (variable1 value1 ...)."
 
 (defun org-if-goto-first-heading ()
   "Go to the line containing the first major heading in the current buffer.
-Major heading start with *."
+Major heading start with \"*\"."
   (goto-char (point-min))
   (while (not (equal "* "
                      (buffer-substring-no-properties (line-beginning-position)
