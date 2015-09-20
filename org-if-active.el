@@ -43,7 +43,7 @@
     (save-excursion
       (goto-char (org-find-exact-headline-in-buffer "Code"))
       (open-line 1)
-      (insert "* Choices\n\n")))
+      (insert "* Choices\n")))
 
 (defun org-if-confirm-babel-evaluate (lang body)
     "Replacement for `org-confirm-babel-evaluate' when mode is on.
@@ -80,13 +80,11 @@ they visit a new file."
          'org-babel-load-languages
          '((org-if . t)))
         (add-hook 'org-mode-hook 'org-if-org-mode-hook)
-        ;(add-hook 'org-follow-link-hook 'org-if-hide-code)
         (org-if-reset-env)); Clear any data leftover from previous session
     (progn
       (custom-reevaluate-setting 'org-confirm-babel-evaluate)
       (custom-reevaluate-setting 'org-babel-load-languages)
       (remove-hook 'org-mode-hook 'org-if-org-mode-hook)
-      ;(remove-hook 'org-follow-link-hook 'org-if-hide-code)
       (kill-buffer *org-if-current-file*) ; Kill last buffer visited by org-if.
       (setf *org-if-current-file* nil)
       (org-if-reset-env))))
